@@ -1,4 +1,5 @@
 import { getFundos } from "@/features/fundos/services/fundos.service";
+import { FundList } from "@/features/fundos/components/FundList";
 
 
 export default async function Home(){
@@ -8,39 +9,29 @@ export default async function Home(){
 
   return (
 
-    <main>
+    <main className="p-8">
 
-      <h1>
+
+      <h1 className="text-4xl font-bold">
         FIIPro
       </h1>
 
 
-      <h2>
-        Fundos cadastrados
+      <p className="mt-2">
+        Transforme seus dividendos em novas cotas.
+      </p>
+
+
+      <h2 className="mt-10 text-2xl font-bold">
+        Fundos em destaque
       </h2>
 
 
-      {
-        fundos.map((fundo)=>(
-          
-          <div key={fundo.id}>
+      <div className="mt-6">
 
-            <h3>
-              {fundo.ticker}
-            </h3>
+        <FundList fundos={fundos}/>
 
-            <p>
-              {fundo.nome}
-            </p>
-
-            <p>
-              R$ {fundo.cotacao}
-            </p>
-
-          </div>
-
-        ))
-      }
+      </div>
 
 
     </main>
