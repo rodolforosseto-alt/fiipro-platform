@@ -1,81 +1,66 @@
 import { getFundoByTicker } from "@/features/fundos/services/fundos.service";
 
+import { FundHeader } from "@/features/fundos/components/FundHeader";
+
+import { FundMetrics } from "@/features/fundos/components/FundMetrics";
+
+import { FundActions } from "@/features/fundos/components/FundActions";
+
 
 interface Props {
 
-  params: Promise<{
-    ticker:string;
-  }>
+params: Promise<{
+ticker:string;
+}>
 
 }
 
 
 export default async function FundoPage({
-  params
+params
 }:Props){
 
 
-  const { ticker } = await params;
+const {ticker}=await params;
 
 
-  const fundo = await getFundoByTicker(
-    ticker
-  );
+const fundo =
+await getFundoByTicker(ticker);
 
 
-  return (
 
-    <main className="p-8">
+return (
 
-      <h1 className="text-4xl font-bold">
-        {fundo.ticker}
-      </h1>
+<main className="p-8">
 
 
-      <h2 className="text-xl mt-2">
-        {fundo.nome}
-      </h2>
+<FundHeader
+
+ticker={fundo.ticker}
+
+nome={fundo.nome}
+
+segmento={fundo.segmento}
+
+/>
 
 
-      <div className="mt-8 grid gap-4 md:grid-cols-4">
+<FundMetrics
+
+cotacao={fundo.cotacao}
+
+dividendo={fundo.ultimo_dividendo}
+
+dy={fundo.dy_mensal}
+
+/>
 
 
-        <div className="border rounded-xl p-4">
-          <p>Cotação</p>
-          <strong>
-            R$ {fundo.cotacao}
-          </strong>
-        </div>
+<FundActions/>
 
 
-        <div className="border rounded-xl p-4">
-          <p>Dividendo</p>
-          <strong>
-            R$ {fundo.ultimo_dividendo}
-          </strong>
-        </div>
+</main>
 
-
-        <div className="border rounded-xl p-4">
-          <p>DY mensal</p>
-          <strong>
-            {fundo.dy_mensal}%
-          </strong>
-        </div>
-
-
-        <div className="border rounded-xl p-4">
-          <p>Segmento</p>
-          <strong>
-            {fundo.segmento}
-          </strong>
-        </div>
-
-
-      </div>
-
-    </main>
-
-  )
+)
 
 }
