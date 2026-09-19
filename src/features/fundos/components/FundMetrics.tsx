@@ -1,3 +1,6 @@
+import { MetricCard } from "@/components/finance/MetricCard";
+
+
 interface Props {
 
 cotacao:number;
@@ -20,45 +23,37 @@ return (
 <div className="grid gap-4 md:grid-cols-3 mt-8">
 
 
-<div className="border rounded-xl p-5">
+<MetricCard
 
-<p className="text-gray-500">
-Cotação
-</p>
+title="Cotação"
 
-<strong>
-R$ {cotacao.toFixed(2)}
-</strong>
+value={`R$ ${cotacao.toFixed(2)}`}
 
-</div>
+description="Preço atual da cota"
+
+/>
 
 
+<MetricCard
 
-<div className="border rounded-xl p-5">
+title="Dividendo"
 
-<p className="text-gray-500">
-Dividendo
-</p>
+value={`R$ ${dividendo.toFixed(2)}`}
 
-<strong className="text-green-600">
-R$ {dividendo.toFixed(2)}
-</strong>
+description="Último rendimento"
 
-</div>
+/>
 
 
+<MetricCard
 
-<div className="border rounded-xl p-5">
+title="DY mensal"
 
-<p className="text-gray-500">
-DY mensal
-</p>
+value={`${dy}%`}
 
-<strong>
-{dy}%
-</strong>
+description="Dividend Yield"
 
-</div>
+/>
 
 
 </div>

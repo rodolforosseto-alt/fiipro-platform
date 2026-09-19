@@ -12,6 +12,8 @@ import { DividendHistory } from "@/features/dividendos/components/DividendHistor
 
 import { notFound } from "next/navigation";
 
+import { MetricCard } from "@/components/finance/MetricCard";
+
 
 interface Props {
 

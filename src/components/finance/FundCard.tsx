@@ -1,3 +1,5 @@
+import { Card } from "@/components/ui/Card";
+
 interface FundCardProps {
   ticker: string;
   nome: string;
@@ -18,7 +20,7 @@ export function FundCard({
 }: FundCardProps) {
 
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <Card>
 
       <div className="mb-4">
         <h2 className="text-xl font-bold">
@@ -71,6 +73,6 @@ export function FundCard({
 
       </div>
 
-    </div>
+    </Card>
   );
 }
