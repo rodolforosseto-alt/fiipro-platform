@@ -7,7 +7,7 @@ import { FundosPageClient } from "@/features/fundos/components/FundosPageClient"
 export default async function FundosPage(){
 
 
-const fundos = await getFundos();
+const fundo = await getFundoByTicker(ticker);
 
 
 

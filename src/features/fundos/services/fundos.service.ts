@@ -24,14 +24,19 @@ export async function getFundos(){
 
 export async function getFundoByTicker(ticker:string){
 
-  const { data, error } = await supabase
+console.log("Ticker recebido:", ticker);
+
+  const { data,error } =
+  await supabase
     .from("fundos")
     .select("*")
-    .eq("ticker", ticker)
+    .eq("ticker", ticker.trim().toUpperCase())
     .single();
 
 
   if(error){
+
+    console.error("Erro buscando fundo:", error);
 
     throw error;
 
