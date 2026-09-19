@@ -1,41 +1,23 @@
-import { getFundos } from "@/features/fundos/services/fundos.service";
-import { FundList } from "@/features/fundos/components/FundList";
+import { HeroSection } from "@/features/home/components/HeroSection";
+import { HowItWorks } from "@/features/home/components/HowItWorks";
+import { CallToAction } from "@/features/home/components/CallToAction";
+import { FeaturedFunds } from "@/features/home/components/FeaturedFunds";
 
 
-export default async function Home(){
+export default function Home(){
 
-  const fundos = await getFundos();
+return (
 
+<main>
 
-  return (
+<HeroSection />
 
-    <main className="p-8">
+<HowItWorks />
 
+<CallToAction />
 
-      <h1 className="text-4xl font-bold">
-        FIIPro
-      </h1>
+</main>
 
-
-      <p className="mt-2">
-        Transforme seus dividendos em novas cotas.
-      </p>
-
-
-      <h2 className="mt-10 text-2xl font-bold">
-        Fundos em destaque
-      </h2>
-
-
-      <div className="mt-6">
-
-        <FundList fundos={fundos}/>
-
-      </div>
-
-
-    </main>
-
-  )
+)
 
 }
