@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/Card";
+import Link from "next/link";
 
 interface FundCardProps {
   ticker: string;
@@ -72,6 +73,18 @@ export function FundCard({
         </div>
 
       </div>
+
+<Link
+
+href={`/fundos/${ticker}`}
+
+className="mt-5 inline-block text-blue-600 font-semibold"
+
+>
+
+Ver detalhes →
+
+</Link>
 
     </Card>
   );
