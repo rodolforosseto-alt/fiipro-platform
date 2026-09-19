@@ -1,10 +1,14 @@
 import { getFundoByTicker } from "@/features/fundos/services/fundos.service";
 
+import { getDividendosByFundo } from "@/features/dividendos/services/dividendos.service";
+
 import { FundHeader } from "@/features/fundos/components/FundHeader";
 
 import { FundMetrics } from "@/features/fundos/components/FundMetrics";
 
 import { FundActions } from "@/features/fundos/components/FundActions";
+
+import { DividendHistory } from "@/features/dividendos/components/DividendHistory";
 
 
 interface Props {
@@ -28,6 +32,8 @@ const fundo =
 await getFundoByTicker(ticker);
 
 
+const dividendos =
+await getDividendosByFundo(fundo.id);
 
 return (
 
@@ -57,6 +63,7 @@ dy={fundo.dy_mensal}
 
 
 <FundActions/>
+<DividendHistory dividendos={dividendos}/>
 
 
 </main>
