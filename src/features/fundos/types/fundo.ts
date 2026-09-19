@@ -1,19 +1,27 @@
 export interface Fundo {
 
-  id: string;
+  id:string;
 
-  ticker: string;
+  ticker:string;
 
-  nome: string;
+  nome:string;
 
-  segmento: string;
+  segmento:string;
 
-  gestor: string;
+  gestor:string;
 
-  cotacao: number;
+  descricao:string | null;
 
-  ultimo_dividendo: number;
+  patrimonio:number | null;
 
-  dy_mensal: number;
+  numero_cotistas:number | null;
+
+  imagem_logo:string | null;
+
+  cotacao:number;
+
+  ultimo_dividendo:number;
+
+  dy_mensal:number;
 
 }
