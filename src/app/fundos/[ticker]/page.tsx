@@ -10,6 +10,8 @@ import { FundActions } from "@/features/fundos/components/FundActions";
 
 import { DividendHistory } from "@/features/dividendos/components/DividendHistory";
 
+import { notFound } from "next/navigation";
+
 
 interface Props {
 
@@ -31,6 +33,9 @@ const {ticker}=await params;
 const fundo =
 await getFundoByTicker(ticker);
 
+if (!fundo) {
+  notFound();
+}
 
 const dividendos =
 await getDividendosByFundo(fundo.id);

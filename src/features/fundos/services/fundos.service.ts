@@ -22,29 +22,25 @@ export async function getFundos(){
 
 }
 
-export async function getFundoByTicker(ticker:string){
+export async function getFundoByTicker(ticker: string) {
 
-console.log("Ticker recebido:", ticker);
+  if (!ticker) {
+    return null;
+  }
 
-  const { data,error } =
-  await supabase
+  const { data, error } = await supabase
     .from("fundos")
     .select("*")
     .eq("ticker", ticker.trim().toUpperCase())
-    .single();
+    .eq("ativo", true)
+    .maybeSingle();
 
-
-  if(error){
-
+  if (error) {
     console.error("Erro buscando fundo:", error);
-
     throw error;
-
   }
 
-
   return data;
-
 }
 
 export async function searchFundos(term:string){
