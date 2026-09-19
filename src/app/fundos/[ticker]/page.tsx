@@ -67,7 +67,7 @@ dy={fundo.dy_mensal}
 />
 
 
-<FundActions/>
+<FundActions ticker={fundo.ticker}/>
 <DividendHistory dividendos={dividendos}/>
 
 

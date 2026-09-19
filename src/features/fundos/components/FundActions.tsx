@@ -1,26 +1,37 @@
-export function FundActions(){
-
-return (
-
-<div className="mt-8 flex gap-4">
+import Link from "next/link";
 
 
-<button className="bg-green-600 text-white px-5 py-3 rounded-lg">
-
-Calcular bola de neve
-
-</button>
+interface Props {
+  ticker: string;
+}
 
 
-<button className="border px-5 py-3 rounded-lg">
+export function FundActions({
+  ticker,
+}: Props) {
 
-Adicionar carteira
+  return (
 
-</button>
+    <div className="mt-8 flex gap-4">
 
 
-</div>
+      <Link
+        href={`/calculadora?fundo=${encodeURIComponent(
+          ticker
+        )}`}
+        className="rounded-lg bg-green-600 px-5 py-3 text-white"
+      >
+        Calcular bola de neve
+      </Link>
 
-)
+
+      <button className="rounded-lg border px-5 py-3">
+        Adicionar carteira
+      </button>
+
+
+    </div>
+
+  );
 
 }
