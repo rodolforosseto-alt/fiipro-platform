@@ -4,46 +4,105 @@
 import { useState } from "react";
 
 import { FundList } from "./FundList";
-
 import { FundSearch } from "./FundSearch";
-
-import { searchFundos } from "../services/fundos.service";
-
+import { FundFilters } from "./FundFilters";
 
 
-export function FundosPageClient({initialFundos}:any){
+import {
+  getFundos,
+  searchFundos,
+  getFundosBySegmento
+} from "../services/fundos.service";
 
 
-const [fundos,setFundos]=useState(initialFundos);
 
+interface Props {
 
-
-async function handleSearch(term:string){
-
-const result = await searchFundos(term);
-
-setFundos(result);
+  initialFundos:any[];
 
 }
 
 
 
-return (
-
-<>
-
-<FundSearch onSearch={handleSearch}/>
+export function FundosPageClient({
+  initialFundos
+}:Props){
 
 
-<div className="mt-8">
-
-<FundList fundos={fundos}/>
-
-</div>
+  const [fundos,setFundos] =
+    useState(initialFundos);
 
 
-</>
+  const [segmento,setSegmento] =
+    useState("Todos");
 
-)
+
+
+  async function handleSegmento(
+    novoSegmento:string
+  ){
+
+    setSegmento(novoSegmento);
+
+
+    if(novoSegmento === "Todos"){
+
+      const result =
+        await getFundos();
+
+      setFundos(result);
+
+      return;
+
+    }
+
+
+    const result =
+      await getFundosBySegmento(
+        novoSegmento
+      );
+
+
+    setFundos(result);
+
+  }
+
+
+
+  return (
+
+    <>
+
+      <FundSearch
+        onSearch={async (term)=>{
+
+          const result =
+            await searchFundos(term);
+
+          setFundos(result);
+
+        }}
+      />
+
+
+      <FundFilters
+
+        segmento={segmento}
+
+        onChange={handleSegmento}
+
+      />
+
+
+      <div className="mt-8">
+
+        <FundList fundos={fundos}/>
+
+      </div>
+
+
+    </>
+
+  );
 
 }

@@ -64,3 +64,30 @@ export async function searchFundos(term:string){
   return data;
 
 }
+
+export async function getFundosBySegmento(
+  segmento:string
+){
+
+  const { data,error } = await supabase
+    .from("fundos")
+    .select("*")
+    .eq("segmento", segmento)
+    .eq("ativo", true);
+
+
+  if(error){
+
+    console.error(
+      "Erro buscando fundos por segmento:",
+      error
+    );
+
+    throw error;
+
+  }
+
+
+  return data;
+
+}
