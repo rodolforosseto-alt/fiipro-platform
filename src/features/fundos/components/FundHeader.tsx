@@ -19,12 +19,12 @@ return (
 
 <div>
 
-<h1 className="text-4xl font-bold">
+<h1 className="text-5xl font-black text-black">
 {ticker}
 </h1>
 
 
-<h2 className="text-xl text-gray-600 mt-2">
+<h2 className="mt-2 text-xl font-semibold text-gray-700">
 {nome}
 </h2>
 

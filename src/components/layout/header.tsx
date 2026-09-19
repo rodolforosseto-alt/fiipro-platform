@@ -1,55 +1,139 @@
+"use client";
+
+
+import { useState } from "react";
 import Link from "next/link";
 
 
 export function Header(){
 
-return (
-
-<header className="border-b bg-white">
+  const [open,setOpen] = useState(false);
 
 
-<div className="mx-auto flex max-w-6xl items-center justify-between p-5">
+  return (
+
+    <header className="relative border-b bg-white">
 
 
-<Link
-href="/"
-className="text-2xl font-bold text-blue-900"
->
-FIIPro
-</Link>
+      <div className="mx-auto flex max-w-6xl items-center justify-between p-5">
 
 
-<nav className="flex gap-6">
+        <Link
+          href="/"
+          className="text-2xl font-bold text-blue-900"
+        >
+          FIIPro
+        </Link>
 
 
-<Link href="/">
-Início
-</Link>
+
+        {/* Desktop */}
+
+        <nav className="hidden gap-6 md:flex">
+
+          <Link href="/">
+            Início
+          </Link>
 
 
-<Link href="/fundos">
-Fundos
-</Link>
+          <Link href="/fundos">
+            Fundos
+          </Link>
 
 
-<Link href="/calculadora">
-Calculadora
-</Link>
+          <Link href="/calculadora">
+            Calculadora
+          </Link>
 
 
-</nav>
+          <button className="rounded-lg bg-green-600 px-4 py-2 text-white">
+            Entrar
+          </button>
+
+        </nav>
 
 
-<button className="rounded-lg bg-green-600 px-4 py-2 text-white">
-Entrar
-</button>
+
+        {/* Mobile */}
+
+        <button
+
+          type="button"
+
+          className="relative z-[9999] text-3xl md:hidden"
+
+          onClick={() => setOpen(!open)}
+
+        >
+
+          ☰
+
+        </button>
 
 
-</div>
+      </div>
 
 
-</header>
 
-)
+      {
+        open && (
+
+          <nav
+
+            className="
+            absolute
+            left-0
+            top-full
+            z-[9998]
+            flex
+            w-full
+            flex-col
+            gap-4
+            border-b
+            bg-white
+            p-5
+            md:hidden
+            "
+
+          >
+
+            <Link
+              href="/"
+              onClick={()=>setOpen(false)}
+            >
+              Início
+            </Link>
+
+
+            <Link
+              href="/fundos"
+              onClick={()=>setOpen(false)}
+            >
+              Fundos
+            </Link>
+
+
+            <Link
+              href="/calculadora"
+              onClick={()=>setOpen(false)}
+            >
+              Calculadora
+            </Link>
+
+
+            <button className="rounded-lg bg-green-600 px-4 py-2 text-white">
+              Entrar
+            </button>
+
+
+          </nav>
+
+        )
+      }
+
+
+    </header>
+
+  );
 
 }
