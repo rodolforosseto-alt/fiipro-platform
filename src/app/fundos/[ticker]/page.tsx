@@ -14,6 +14,7 @@ import { notFound } from "next/navigation";
 
 import { MetricCard } from "@/components/finance/MetricCard";
 
+import { FundInformation } from "@/features/fundos/components/FundInformation";
 
 interface Props {
 
@@ -65,6 +66,18 @@ cotacao={fundo.cotacao}
 dividendo={fundo.ultimo_dividendo}
 
 dy={fundo.dy_mensal}
+
+/>
+
+<FundInformation
+
+gestor={fundo.gestor}
+
+descricao={fundo.descricao}
+
+patrimonio={fundo.patrimonio}
+
+numero_cotistas={fundo.numero_cotistas}
 
 />
 
