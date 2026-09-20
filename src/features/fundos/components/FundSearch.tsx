@@ -1,7 +1,6 @@
 "use client";
 
-
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 
@@ -26,9 +25,58 @@ export function FundSearch({
 const [term,setTerm] =
 useState("");
 
+const [temBusca,setTemBusca] =
+useState(false);
 
 const [sugestoes,setSugestoes] =
 useState<FundoSearchResult[]>([]);
+
+const containerRef =
+useRef<HTMLDivElement>(null);
+
+useEffect(()=>{
+
+console.log("FundSearch montou");
+
+function handleClickOutside(
+event:PointerEvent
+){
+
+    console.log("clique detectado");
+
+    if(
+containerRef.current &&
+!containerRef.current.contains(
+event.target as Node
+)
+){
+
+setSugestoes([]);
+setTemBusca(false);
+
+}
+
+}
+
+
+document.addEventListener(
+"pointerdown",
+handleClickOutside
+);
+
+
+return ()=>{
+
+document.removeEventListener(
+"pointerdown",
+handleClickOutside
+);
+
+};
+
+
+},[]);
+
 
 
 
@@ -37,6 +85,8 @@ value:string
 ){
 
 setTerm(value);
+
+setTemBusca(false);
 
 
 if(value.length < 2){
@@ -48,11 +98,15 @@ return;
 }
 
 
+
+
 const result =
 await searchFundosAutocomplete(value);
 
 
 setSugestoes(result);
+
+setTemBusca(true);
 
 }
 
@@ -70,7 +124,10 @@ setSugestoes([]);
 
 return (
 
-<div className="relative w-full">
+<div
+ref={containerRef}
+className="relative w-full"
+>
 
 
 <div className="flex gap-3">
@@ -191,8 +248,8 @@ setTerm("");
 }
 
 {
-  term.length >= 2 &&
-  sugestoes.length === 0 && (
+   temBusca &&
+    sugestoes.length === 0 && (
 
     <div className="
       absolute
