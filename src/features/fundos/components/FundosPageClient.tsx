@@ -6,6 +6,7 @@ import { useState } from "react";
 import { FundList } from "./FundList";
 import { FundSearch } from "./FundSearch";
 import { FundFilters } from "./FundFilters";
+import { FundAutocomplete } from "./FundAutocomplete";
 
 
 import {

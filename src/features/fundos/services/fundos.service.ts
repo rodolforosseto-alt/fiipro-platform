@@ -91,3 +91,49 @@ export async function getFundosBySegmento(
   return data;
 
 }
+
+export async function searchFundosAutocomplete(
+  term:string
+){
+
+  if(!term || term.trim().length < 2){
+
+    return [];
+
+  }
+
+
+  const { data,error } =
+    await supabase
+      .from("fundos")
+      .select(
+        `
+        id,
+        ticker,
+        nome,
+        segmento
+        `
+      )
+      .or(
+      `ticker.ilike.%${term}%,nome.ilike.%${term}%`
+      )
+      .eq("ativo",true)
+      .limit(5);
+
+
+
+  if(error){
+
+    console.error(
+      "Erro no autocomplete:",
+      error
+    );
+
+    throw error;
+
+  }
+
+
+  return data;
+
+}

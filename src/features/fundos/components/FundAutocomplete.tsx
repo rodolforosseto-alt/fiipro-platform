@@ -8,24 +8,14 @@ import Link from "next/link";
 import { searchFundosAutocomplete } from "../services/fundos.service";
 
 
-interface Props {
-
-  onSearch:(term:string)=>void;
-
-}
-
-
-
-export function FundSearch({
-  onSearch
-}:Props){
+export function FundAutocomplete(){
 
 
 const [term,setTerm] =
 useState("");
 
 
-const [sugestoes,setSugestoes] =
+const [resultados,setResultados] =
 useState<any[]>([]);
 
 
@@ -39,28 +29,18 @@ setTerm(value);
 
 if(value.length < 2){
 
-setSugestoes([]);
+setResultados([]);
 
 return;
 
 }
 
 
-const result =
+const data =
 await searchFundosAutocomplete(value);
 
 
-setSugestoes(result);
-
-}
-
-
-
-function handleSearch(){
-
-onSearch(term);
-
-setSugestoes([]);
+setResultados(data);
 
 }
 
@@ -71,14 +51,7 @@ return (
 <div className="relative w-full">
 
 
-<div className="flex gap-3">
-
-
 <input
-
-className="w-full rounded-lg border p-3"
-
-placeholder="Digite o ticker ou nome do fundo"
 
 value={term}
 
@@ -86,36 +59,28 @@ onChange={(e)=>
 handleChange(e.target.value)
 }
 
+placeholder="Digite o ticker ou nome do fundo"
+
+className="
+w-full
+rounded-lg
+border
+p-3
+"
+
+
 />
 
 
 
-<button
-
-className="rounded-lg bg-blue-600 px-5 text-white"
-
-onClick={handleSearch}
-
->
-
-Buscar
-
-</button>
-
-
-</div>
-
-
-
 {
-sugestoes.length > 0 && (
+resultados.length > 0 && (
 
 <div className="
 absolute
 z-50
 mt-2
 w-full
-overflow-hidden
 rounded-lg
 border
 bg-white
@@ -124,7 +89,7 @@ shadow-lg
 
 
 {
-sugestoes.map((fundo)=>(
+resultados.map((fundo)=>(
 
 
 <Link
@@ -133,6 +98,14 @@ key={fundo.id}
 
 href={`/fundos/${fundo.ticker}`}
 
+onClick={()=>{
+
+setResultados([]);
+
+setTerm("");
+
+}}
+
 className="
 block
 border-b
@@ -140,36 +113,28 @@ p-4
 hover:bg-gray-50
 "
 
-onClick={()=>{
-
-setSugestoes([]);
-
-setTerm("");
-
-}}
-
 >
 
 
-<div className="font-bold text-gray-900">
+<p className="font-bold">
 
 {fundo.ticker}
 
-</div>
+</p>
 
 
-<div className="text-gray-600">
+<p className="text-gray-600">
 
 {fundo.nome}
 
-</div>
+</p>
 
 
-<div className="text-sm text-blue-600">
+<p className="text-sm text-blue-600">
 
 {fundo.segmento}
 
-</div>
+</p>
 
 
 </Link>
