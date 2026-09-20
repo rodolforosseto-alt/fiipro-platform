@@ -24,4 +24,8 @@ export interface Fundo {
 
   dy_mensal:number;
 
+  ultima_atualizacao:string | null;
+
+  fonte_dados:string | null;
+
 }
