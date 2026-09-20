@@ -31,6 +31,9 @@ useState(false);
 const [sugestoes,setSugestoes] =
 useState<FundoSearchResult[]>([]);
 
+const [selecionado,setSelecionado] =
+useState(0);
+
 const containerRef =
 useRef<HTMLDivElement>(null);
 
@@ -85,6 +88,7 @@ value:string
 ){
 
 setTerm(value);
+setSelecionado(0);
 
 setTemBusca(false);
 
@@ -120,6 +124,66 @@ setSugestoes([]);
 
 }
 
+function handleKeyDown(
+event: React.KeyboardEvent<HTMLInputElement>
+){
+
+
+if(sugestoes.length === 0){
+
+return;
+
+}
+
+
+if(event.key === "ArrowDown"){
+
+event.preventDefault();
+
+setSelecionado(
+(prev)=>
+(prev + 1) % sugestoes.length
+);
+
+}
+
+
+
+if(event.key === "ArrowUp"){
+
+event.preventDefault();
+
+setSelecionado(
+(prev)=>
+(prev - 1 + sugestoes.length)
+% sugestoes.length
+);
+
+}
+
+
+
+if(event.key === "Enter"){
+
+event.preventDefault();
+
+
+const fundo =
+sugestoes[selecionado];
+
+
+if(fundo){
+
+window.location.href =
+`/fundos/${fundo.ticker}`;
+
+}
+
+}
+
+
+}
+
 
 
 return (
@@ -144,6 +208,8 @@ value={term}
 onChange={(e)=>
 handleChange(e.target.value)
 }
+
+onKeyDown={handleKeyDown}
 
 />
 
@@ -176,7 +242,7 @@ absolute
 z-50
 mt-2
 w-full
-overflow-hidden
+overflow-y-auto
 rounded-lg
 border
 bg-white
@@ -185,7 +251,7 @@ shadow-lg
 
 
 {
-sugestoes.map((fundo)=>(
+sugestoes.map((fundo,index)=>(
 
 
 <Link
@@ -194,12 +260,16 @@ key={fundo.id}
 
 href={`/fundos/${fundo.ticker}`}
 
-className="
+className={`
 block
 border-b
 p-4
-hover:bg-gray-50
-"
+${
+selecionado === index
+? "bg-blue-50 border-l-4 border-blue-600"
+: "hover:bg-gray-50"
+}
+`}
 
 onClick={()=>{
 
