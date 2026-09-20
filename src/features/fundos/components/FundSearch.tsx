@@ -7,6 +7,8 @@ import Link from "next/link";
 
 import { searchFundosAutocomplete } from "../services/fundos.service";
 
+import { FundoSearchResult } from "../types/fundo-search";
+
 
 interface Props {
 
@@ -26,7 +28,7 @@ useState("");
 
 
 const [sugestoes,setSugestoes] =
-useState<any[]>([]);
+useState<FundoSearchResult[]>([]);
 
 
 
@@ -110,6 +112,8 @@ Buscar
 {
 sugestoes.length > 0 && (
 
+    
+
 <div className="
 absolute
 z-50
@@ -186,9 +190,35 @@ setTerm("");
 
 }
 
+{
+  term.length >= 2 &&
+  sugestoes.length === 0 && (
+
+    <div className="
+      absolute
+      z-50
+      mt-2
+      w-full
+      rounded-lg
+      border
+      bg-white
+      p-4
+      text-gray-500
+      shadow-lg
+    ">
+
+      Nenhum fundo encontrado.
+
+    </div>
+
+  )
+}
+
+
 
 </div>
 
-)
+);
 
 }
+
