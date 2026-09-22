@@ -17,6 +17,13 @@ import { validarDividendosCSV } from "../validators/dividendos.validator";
 
 import { importDividendos } from "../services/dividend-import.service";
 
+import { validarCotacoesCSV }
+from "../validators/cotacoes.validator";
+
+
+import { importCotacoes }
+from "../services/cotacao-import.service";
+
 export function ImportCsvForm(){
 
 
@@ -70,7 +77,12 @@ if(tipo === "fundos"){
 
   await importDividendos(dados);
 
+}else if(tipo === "cotacoes"){
+
+ await importCotacoes(dados);
+
 }
+
 await updateImportacao(
 
 importacao.id,
@@ -159,6 +171,12 @@ Dividendos
 
 </option>
 
+<option value="cotacoes">
+
+Cotações
+
+</option>
+
 
 </select>
 
@@ -200,11 +218,38 @@ complete:(result)=>{
 const dadosCSV =
 result.data as any[]
 
-const validacao =
-tipo === "fundos"
-? validarFundosCSV(dadosCSV)
-: validarDividendosCSV(dadosCSV);
+let validacao = {
 
+ok:false,
+
+mensagem:"Tipo de importação inválido."
+
+};
+
+switch(tipo){
+
+
+case "fundos":
+
+validacao = validarFundosCSV(dadosCSV);
+
+break;
+
+case "dividendos":
+
+validacao =
+validarDividendosCSV(dadosCSV);
+break;
+
+
+case "cotacoes":
+
+validacao =
+validarCotacoesCSV(dadosCSV);
+break;
+
+
+}
 
 if(!validacao.ok){
 
