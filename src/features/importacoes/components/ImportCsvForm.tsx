@@ -1,13 +1,21 @@
 "use client";
 
-
 import { useState } from "react";
 
-import {createImportacao, updateImportacao} from "../services/import.service";
+import {
+  createImportacao,
+  updateImportacao
+} from "../services/import.service";
 
 import Papa from "papaparse";
 
 import { importFundos } from "../services/fund-import.service";
+
+import { validarFundosCSV } from "../validators/fundos.validator";
+
+import { validarDividendosCSV } from "../validators/dividendos.validator";
+
+import { importDividendos } from "../services/dividend-import.service";
 
 export function ImportCsvForm(){
 
@@ -18,69 +26,11 @@ useState<File | null>(null);
 const [dados,setDados] =
 useState<any[]>([]);
 
-
 const [mensagem,setMensagem] =
 useState("");
 
-
-function validarCSV(
-  dados:any[]
-){
-
-  if(dados.length === 0){
-
-    return {
-
-      ok:false,
-
-      mensagem:"Arquivo vazio."
-
-    };
-
-  }
-
-
-  const camposObrigatorios = [
-
-    "ticker",
-
-    "nome",
-
-    "segmento"
-
-  ];
-
-
-
-  for(const campo of camposObrigatorios){
-
-    if(!dados[0]?.[campo]){
-
-      return {
-
-        ok:false,
-
-        mensagem:
-        `Campo obrigatório ausente: ${campo}`
-
-      };
-
-    }
-
-  }
-
-
-  return {
-
-    ok:true,
-
-    mensagem:"CSV válido"
-
-  };
-
-}
-
-
+const [tipo,setTipo] =
+useState("fundos");
 
 async function handleSubmit(
 event:React.FormEvent<HTMLFormElement>
@@ -103,7 +53,7 @@ return;
 const importacao =
 await createImportacao({
 
-  tipo:"fundos",
+  tipo:tipo,
 
 arquivo_nome:
 arquivo.name
@@ -112,9 +62,15 @@ arquivo.name
 
 try {
 
-await importFundos(dados);
+if(tipo === "fundos"){
 
+  await importFundos(dados);
 
+}else if(tipo === "dividendos"){
+
+  await importDividendos(dados);
+
+}
 await updateImportacao(
 
 importacao.id,
@@ -178,6 +134,36 @@ className="space-y-5"
 >
 
 
+<select
+
+value={tipo}
+
+onChange={(e)=>
+setTipo(e.target.value)
+}
+
+className="w-full rounded-lg border p-3"
+
+>
+
+<option value="fundos">
+
+Fundos
+
+</option>
+
+
+<option value="dividendos">
+
+Dividendos
+
+</option>
+
+
+</select>
+
+
+
 <input
 
 type="file"
@@ -211,14 +197,13 @@ skipEmptyLines:true,
 
 complete:(result)=>{
 
-
 const dadosCSV =
-result.data as any[];
-
+result.data as any[]
 
 const validacao =
-validarCSV(dadosCSV);
-
+tipo === "fundos"
+? validarFundosCSV(dadosCSV)
+: validarDividendosCSV(dadosCSV);
 
 
 if(!validacao.ok){
