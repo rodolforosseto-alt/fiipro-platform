@@ -8,8 +8,7 @@ export interface UpcomingDividendo {
 
   fundos:{
     ticker:string;
-
     nome:string;
-  };
+  }[];
 
 }
