@@ -20,12 +20,13 @@ import { importDividendos } from "../services/dividend-import.service";
 import { validarCotacoesCSV }
 from "../validators/cotacoes.validator";
 
-
 import { importCotacoes }
 from "../services/cotacao-import.service";
 
-export function ImportCsvForm(){
+import { ImportResult }
+from "../types/import-result";
 
+export function ImportCsvForm(){
 
 const [arquivo,setArquivo] =
 useState<File | null>(null);
@@ -40,7 +41,7 @@ const [tipo,setTipo] =
 useState("fundos");
 
 async function handleSubmit(
-event:React.FormEvent<HTMLFormElement>
+event:any
 ){
 
 event.preventDefault();
@@ -69,19 +70,39 @@ arquivo.name
 
 try {
 
+
+let resultado: ImportResult = {
+
+processados:0,
+
+novos:0,
+
+duplicados:0,
+
+atualizados:0,
+
+erros:0
+
+};
+
+
 if(tipo === "fundos"){
 
+  resultado =
   await importFundos(dados);
 
 }else if(tipo === "dividendos"){
 
+  resultado =
   await importDividendos(dados);
 
 }else if(tipo === "cotacoes"){
 
+  resultado =
  await importCotacoes(dados);
 
 }
+
 
 await updateImportacao(
 
@@ -92,12 +113,25 @@ importacao.id,
 status:"concluido",
 
 quantidade_registros:
-dados.length
+dados.length,
+
+registros_processados:
+resultado.processados,
+
+registros_novos:
+resultado.novos,
+
+registros_atualizados:
+resultado.atualizados,
+
+registros_duplicados:
+resultado.duplicados,
+
+registros_erro:
+resultado.erros
 
 }
-
 );
-
 
 
 setMensagem(
@@ -109,7 +143,6 @@ setMensagem(
 
 
 catch(error){
-
 
 await updateImportacao(
 
@@ -190,7 +223,6 @@ accept=".csv"
 
 onChange={(e)=>{
 
-
 const file =
 e.target.files?.[0];
 
@@ -201,9 +233,7 @@ return;
 
 }
 
-
 setArquivo(file);
-
 
 
 Papa.parse(file,{
@@ -216,7 +246,9 @@ skipEmptyLines:true,
 complete:(result)=>{
 
 const dadosCSV =
-result.data as any[]
+result.data as any[];
+
+setDados(dadosCSV);
 
 let validacao = {
 
@@ -228,7 +260,8 @@ mensagem:"Tipo de importação inválido."
 
 switch(tipo){
 
-
+  
+  
 case "fundos":
 
 validacao = validarFundosCSV(dadosCSV);
@@ -239,6 +272,7 @@ case "dividendos":
 
 validacao =
 validarDividendosCSV(dadosCSV);
+
 break;
 
 
@@ -246,6 +280,7 @@ case "cotacoes":
 
 validacao =
 validarCotacoesCSV(dadosCSV);
+
 break;
 
 
@@ -316,6 +351,8 @@ null,
 }
 
 <button
+
+type="submit"
 
 className="
 rounded-lg

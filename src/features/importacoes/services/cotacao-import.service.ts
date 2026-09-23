@@ -1,9 +1,12 @@
 import { supabase } from "@/lib/supabase";
 
+import { ImportResult }
+from "../types/import-result";
 
 export async function importCotacoes(
 dados:any[]
-){
+):Promise<ImportResult>
+{
 
 const cotacoes = [];
 
@@ -52,7 +55,17 @@ valor:Number(item.valor),
 
 if(cotacoes.length === 0){
 
-return [];
+return {
+
+processados:0,
+
+novos:0,
+
+duplicados:0,
+
+erros:0
+
+};
 
 }
 
@@ -73,7 +86,8 @@ onConflict:
 
 }
 
-);
+)
+.select();
 
 
 
@@ -90,6 +104,19 @@ throw error;
 
 
 
-return data;
+return {
+
+  processados:
+  dados.length,
+
+  novos:
+  data?.length ?? 0,
+
+  duplicados:
+  dados.length - (data?.length ?? 0),
+
+  erros:0
+
+};
 
 }

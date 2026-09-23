@@ -26,11 +26,6 @@ arquivo_nome:dados.arquivo_nome
 
 if(error){
 
-console.error(
-"Erro criando importação:",
-error
-);
-
 throw error;
 
 }
@@ -45,9 +40,20 @@ export async function updateImportacao(
 id:string,
 
 dados:{
+
 status:string;
 
 quantidade_registros?:number;
+
+registros_processados?:number;
+
+registros_novos?:number;
+
+registros_duplicados?:number;
+
+registros_atualizados?:number;
+
+registros_erro?:number;
 
 mensagem?:string;
 
@@ -73,11 +79,6 @@ new Date().toISOString()
 
 
 if(error){
-
-console.error(
-"Erro atualizando importação:",
-error
-);
 
 throw error;
 

@@ -1,9 +1,12 @@
 import { supabase } from "@/lib/supabase";
 
+import { ImportResult }
+from "../types/import-result";
 
 export async function importDividendos(
 dados:any[]
-){
+):Promise<ImportResult>
+{
 
 const dividendos = [];
 
@@ -62,10 +65,19 @@ new Date().toISOString()
 
 if(dividendos.length === 0){
 
-return [];
+return {
+
+processados:0,
+
+novos:0,
+
+duplicados:0,
+
+erros:0
+
+};
 
 }
-
 
 
 const { data,error } =
@@ -78,7 +90,8 @@ dividendos,
 onConflict:
 "fundo_id,data_pagamento,valor"
 }
-);
+)
+.select();
 
 
 
@@ -93,8 +106,19 @@ throw error;
 
 }
 
+return {
 
+  processados:
+  dados.length,
 
-return data;
+  novos:
+  data?.length ?? 0,
+  
+duplicados:
+  dados.length - (data?.length ?? 0),
+
+  erros:0
+
+};
 
 }
