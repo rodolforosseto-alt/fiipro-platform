@@ -103,6 +103,28 @@ if(tipo === "fundos"){
 
 }
 
+alert(
+JSON.stringify(
+{
+registros_processados:
+resultado.processados,
+
+registros_novos:
+resultado.novos,
+
+registros_duplicados:
+resultado.duplicados,
+
+registros_atualizados:
+resultado.atualizados,
+
+registros_erro:
+resultado.erros
+},
+null,
+2
+)
+);
 
 await updateImportacao(
 

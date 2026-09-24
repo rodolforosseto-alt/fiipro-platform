@@ -4,17 +4,30 @@ import { getDividendosByFundo } from "@/features/dividendos/services/dividendos.
 
 import { FundHeader } from "@/features/fundos/components/FundHeader";
 
-import { FundMetrics } from "@/features/fundos/components/FundMetrics";
-
 import { FundActions } from "@/features/fundos/components/FundActions";
-
-import { DividendHistory } from "@/features/dividendos/components/DividendHistory";
 
 import { notFound } from "next/navigation";
 
 import { MetricCard } from "@/components/finance/MetricCard";
 
 import { FundInformation } from "@/features/fundos/components/FundInformation";
+
+import { FundDividendAverage }
+from "@/features/fundos/components/FundDividendAverage";
+
+import { getCotacoesByFundo }
+from "@/features/cotacoes/services/cotacoes.service";
+
+import { FundOverview }
+from "@/features/fundos/components/FundOverview";
+
+
+import { FundDividendSection }
+from "@/features/fundos/components/FundDividendSection";
+
+
+import { FundMarketSection }
+from "@/features/fundos/components/FundMarketSection";
 
 interface Props {
 
@@ -43,6 +56,14 @@ if (!fundo) {
 const dividendos =
 await getDividendosByFundo(fundo.id);
 
+const cotacoes =
+await getCotacoesByFundo(fundo.id);
+
+console.log(
+"Cotações carregadas:",
+cotacoes
+);
+
 return (
 
 <main className="p-8">
@@ -59,7 +80,8 @@ segmento={fundo.segmento}
 />
 
 
-<FundMetrics
+
+<FundOverview
 
 cotacao={fundo.cotacao}
 
@@ -67,7 +89,29 @@ dividendo={fundo.ultimo_dividendo}
 
 dy={fundo.dy_mensal}
 
+dividendos={dividendos}
+
+cotacoes={cotacoes}
+
 />
+
+
+
+<FundDividendSection
+
+dividendos={dividendos}
+
+/>
+
+
+
+<FundMarketSection
+
+cotacoes={cotacoes}
+
+/>
+
+
 
 <FundInformation
 
@@ -82,8 +126,12 @@ numero_cotistas={fundo.numero_cotistas}
 />
 
 
-<FundActions ticker={fundo.ticker}/>
-<DividendHistory dividendos={dividendos}/>
+
+<FundActions
+
+ticker={fundo.ticker}
+
+/>
 
 
 </main>

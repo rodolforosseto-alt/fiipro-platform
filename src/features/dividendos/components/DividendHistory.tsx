@@ -14,7 +14,7 @@ export function DividendHistory({ dividendos }: Props) {
       <section className="mt-10">
 
         <h2 className="text-2xl font-bold">
-          Histórico de dividendos
+          Histórico de dividendos ({dividendos.length})
         </h2>
 
         <div className="mt-5 rounded-xl border p-6 text-gray-500">
@@ -30,9 +30,8 @@ export function DividendHistory({ dividendos }: Props) {
     <section className="mt-10">
 
       <h2 className="mb-5 text-2xl font-bold">
-        Histórico de dividendos
+        Histórico de dividendos ({dividendos.length})
       </h2>
-
 
       <div className="overflow-hidden rounded-xl border">
 
@@ -42,6 +41,10 @@ export function DividendHistory({ dividendos }: Props) {
 
             <tr>
 
+              <th className="p-4 text-left">
+                Data corte
+              </th>              
+              
               <th className="p-4 text-left">
                 Data pagamento
               </th>
@@ -64,6 +67,23 @@ export function DividendHistory({ dividendos }: Props) {
                 className="border-t"
               >
 
+                  <td className="p-4">
+
+                  {
+                  dividendo.data_corte
+                  ?
+                  new Date(
+                    dividendo.data_corte
+                  ).toLocaleDateString("pt-BR")
+                  :
+                  "-"
+                  }
+
+                  </td>
+                
+                
+                
+                
                 <td className="p-4">
                   {new Date(
                     dividendo.data_pagamento

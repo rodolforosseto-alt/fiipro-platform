@@ -8,9 +8,16 @@ dados:any[]
 ):Promise<ImportResult>
 {
 
+  alert(
+"importCotacoes carregado"
+);
 const cotacoes = [];
 
+let novos = 0;
 
+let duplicados = 0;
+
+let erros = 0;
 
 for(const item of dados){
 
@@ -31,10 +38,44 @@ console.error(
 `Fundo não encontrado: ${item.ticker}`
 );
 
+erros++;
+
 continue;
 
 }
 
+const { data:existente } =
+
+await supabase
+
+.from("cotacoes_historico")
+
+.select("id")
+
+.eq(
+"fundo_id",
+fundo.id
+)
+
+.eq(
+"data",
+item.data
+)
+
+.maybeSingle();
+
+
+
+if(existente){
+
+duplicados++;
+
+continue;
+
+}
+
+
+novos++;
 
 
 cotacoes.push({
@@ -51,24 +92,36 @@ valor:Number(item.valor),
 
 }
 
-
+alert(
+JSON.stringify(
+{
+totalRecebido:dados.length,
+cotacoesParaInserir:cotacoes.length,
+novos,
+duplicados,
+erros
+},
+null,
+2
+)
+);
 
 if(cotacoes.length === 0){
 
 return {
 
-processados:0,
+processados:
+dados.length,
 
-novos:0,
+novos,
 
-duplicados:0,
+duplicados,
 
-erros:0
+erros
 
 };
 
 }
-
 
 
 const {data,error}=
@@ -102,20 +155,30 @@ throw error;
 
 }
 
-
+alert(
+"RETORNO COTAÇÕES:\n" +
+JSON.stringify(
+{
+processados:dados.length,
+novos,
+duplicados,
+erros
+},
+null,
+2
+)
+);
 
 return {
 
-  processados:
-  dados.length,
+processados:
+dados.length,
 
-  novos:
-  data?.length ?? 0,
+novos,
 
-  duplicados:
-  dados.length - (data?.length ?? 0),
+duplicados,
 
-  erros:0
+erros
 
 };
 
