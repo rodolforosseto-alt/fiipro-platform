@@ -8,9 +8,6 @@ dados:any[]
 ):Promise<ImportResult>
 {
 
-  alert(
-"importCotacoes carregado"
-);
 const cotacoes = [];
 
 let novos = 0;

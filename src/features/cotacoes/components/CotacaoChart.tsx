@@ -118,7 +118,7 @@ item.data
 ).toLocaleDateString(
 "pt-BR",
 {
-month:"short",
+month:"2-digit",
 year:"2-digit"
 }
 ),
@@ -185,6 +185,11 @@ dataKey="data"
 
 
 <YAxis
+
+domain={[
+"dataMin - 0.5",
+"dataMax + 0.5"
+]}
 
 tickFormatter={(valor)=>
 

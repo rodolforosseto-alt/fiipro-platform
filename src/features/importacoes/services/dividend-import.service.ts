@@ -10,7 +10,11 @@ dados:any[]
 
 const dividendos = [];
 
+let novos = 0;
 
+let duplicados = 0;
+
+let erros = 0;
 
 for(const item of dados){
 
@@ -31,11 +35,49 @@ console.error(
 `Fundo não encontrado: ${item.ticker}`
 );
 
+erros++;
+
+continue;
+
+}
+
+const { data:existente } =
+
+await supabase
+
+.from("dividendos")
+
+.select("id")
+
+.eq(
+"fundo_id",
+fundo.id
+)
+
+.eq(
+"data_pagamento",
+item.data_pagamento
+)
+
+.eq(
+"valor",
+Number(item.valor)
+)
+
+.maybeSingle();
+
+
+
+if(existente){
+
+duplicados++;
+
 continue;
 
 }
 
 
+novos++;
 
 dividendos.push({
 
@@ -67,13 +109,14 @@ if(dividendos.length === 0){
 
 return {
 
-processados:0,
+processados:
+dados.length,
 
-novos:0,
+novos,
 
-duplicados:0,
+duplicados,
 
-erros:0
+erros
 
 };
 
@@ -108,16 +151,15 @@ throw error;
 
 return {
 
-  processados:
-  dados.length,
+processados:
+dados.length,
 
-  novos:
-  data?.length ?? 0,
-  
-duplicados:
-  dados.length - (data?.length ?? 0),
+novos,
 
-  erros:0
+duplicados,
+
+erros
+
 
 };
 

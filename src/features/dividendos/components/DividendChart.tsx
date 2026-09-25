@@ -170,6 +170,7 @@ strokeDasharray="3 3"
 
 <XAxis
 dataKey="data"
+interval="preserveStartEnd"
 />
 
 
