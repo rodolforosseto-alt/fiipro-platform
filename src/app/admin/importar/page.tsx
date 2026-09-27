@@ -1,7 +1,16 @@
 import { ImportCsvForm } from "@/features/importacoes/components/ImportCsvForm";
 
+import { cookies } from "next/headers";
 
-export default function ImportarPage(){
+import { AdminLogin }
+from "./AdminLogin";
+
+export default async function ImportarPage(){
+
+const cookieStore = await cookies();
+
+const autorizado =
+cookieStore.get("fiipro_admin")?.value === "true";
 
 return (
 
@@ -24,7 +33,21 @@ Envie um arquivo CSV para atualizar o FIIPro.
 
 <div className="mt-8">
 
+{
+autorizado
+?
+
 <ImportCsvForm />
+
+:
+
+<AdminLogin />
+
+}
+
+<p className="text-red-600">
+Área administrativa protegida.
+</p>
 
 </div>
 

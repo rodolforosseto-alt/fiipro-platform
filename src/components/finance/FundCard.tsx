@@ -46,7 +46,7 @@ export function FundCard({
           </p>
 
           <p className="text-lg font-semibold">
-            R$ {cotacao.toFixed(2)}
+            {cotacao != null ? `R$ ${cotacao.toFixed(2)}` : "--"}
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export function FundCard({
           </p>
 
           <p className="text-lg font-semibold text-green-600">
-            R$ {ultimo_dividendo.toFixed(2)}
+            {ultimo_dividendo != null ? `R$ ${ultimo_dividendo.toFixed(2)}` : "--"}
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export function FundCard({
           </p>
 
           <p className="text-lg font-semibold">
-            {dy_mensal}%
+            {dy_mensal != null ? `${dy_mensal.toFixed(2)}%` : "--"}
           </p>
         </div>
 

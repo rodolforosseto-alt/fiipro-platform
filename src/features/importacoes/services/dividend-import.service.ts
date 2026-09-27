@@ -122,13 +122,22 @@ erros
 
 }
 
+const dividendosUnicos =
+Array.from(
+new Map(
+dividendos.map(item => [
+`${item.fundo_id}-${item.data_pagamento}-${item.valor}`,
+item
+])
+).values()
+);
 
 const { data,error } =
 
 await supabase
 .from("dividendos")
 .upsert(
-dividendos,
+dividendosUnicos,
 {
 onConflict:
 "fundo_id,data_pagamento,valor"
