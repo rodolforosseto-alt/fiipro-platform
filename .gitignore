@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local tunneling binaries
+cloudflared
+cloudflared.exe
+*.exe
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
