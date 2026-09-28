@@ -29,6 +29,9 @@ from "@/features/fundos/components/FundDividendSection";
 import { FundMarketSection }
 from "@/features/fundos/components/FundMarketSection";
 
+import { registrarAcessoFundo }
+from "@/features/analytics/services/access.service";
+
 interface Props {
 
 params: Promise<{
@@ -52,6 +55,11 @@ await getFundoByTicker(ticker);
 if (!fundo) {
   notFound();
 }
+
+await registrarAcessoFundo(
+fundo.id,
+fundo.ticker
+);
 
 const dividendos =
 await getDividendosByFundo(fundo.id);
