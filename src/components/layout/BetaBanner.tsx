@@ -13,7 +13,7 @@ text-blue-900
 ">
 
 <strong>
-FIIPro Beta
+FIIPro Beta 🚀
 </strong>
 
 {" — "}
