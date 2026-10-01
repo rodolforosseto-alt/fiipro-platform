@@ -14,17 +14,17 @@ return (
 
 <h1 className="text-5xl font-bold text-gray-900">
 
-Transforme seus dividendos
-em novas cotas
+Analise fundos imobiliários
+com mais clareza
 
 </h1>
 
 
 <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
 
-Acompanhe seus fundos imobiliários,
-visualize dividendos e construa sua
-renda passiva.
+Acompanhe dividendos, cotações e indicadores
+dos seus fundos imobiliários em uma plataforma
+simples e completa.
 
 </p>
 
@@ -40,7 +40,7 @@ className="rounded-lg bg-green-600 px-6 py-3 font-semibold text-white"
 
 >
 
-Calcular minha bola de neve
+Simular bola de neve
 
 </Link>
 

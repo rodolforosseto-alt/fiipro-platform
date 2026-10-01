@@ -4,6 +4,8 @@ import { getFundoByTicker } from "@/features/fundos/services/fundos.service";
 
 import { CalculatorForm } from "@/features/calculadora/components/CalculatorForm";
 
+import { FundSelector }
+from "@/features/calculadora/components/FundSelector";
 
 interface Props {
 
@@ -38,12 +40,7 @@ export default async function CalculadoraPage({
           para realizar a simulação.
         </p>
 
-        <Link
-          href="/fundos"
-          className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-3 text-white"
-        >
-          Escolher um fundo
-        </Link>
+        <FundSelector />
 
       </main>
 

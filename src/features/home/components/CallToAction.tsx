@@ -7,14 +7,15 @@ return (
 
 <h2 className="text-3xl font-bold">
 
-Comece sua jornada com dividendos
+Explore seus fundos imobiliários com mais clareza
 
 </h2>
 
 
 <p className="mt-4 text-blue-100">
 
-Uma nova forma de acompanhar seus fundos imobiliários.
+Acompanhe dividendos, cotações e informações
+dos FIIs em uma plataforma criada para investidores.
 
 </p>
 

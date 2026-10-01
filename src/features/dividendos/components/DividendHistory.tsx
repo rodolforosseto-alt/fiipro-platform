@@ -30,7 +30,7 @@ export function DividendHistory({ dividendos }: Props) {
     <section className="mt-10">
 
       <h2 className="mb-5 text-2xl font-bold">
-        Histórico de dividendos ({dividendos.length})
+        Últimos dividendos
       </h2>
 
       <div className="overflow-hidden rounded-xl border">

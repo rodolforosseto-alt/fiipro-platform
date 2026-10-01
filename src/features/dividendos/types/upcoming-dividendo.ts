@@ -1,14 +1,14 @@
 export interface UpcomingDividendo {
 
-  id:string;
+id: string;
 
-  data_pagamento:string;
+data_pagamento: string;
 
-  valor:number;
+valor: number;
 
-  fundos:{
-    ticker:string;
-    nome:string;
-  }[];
+fundos?: {
+  ticker: string;
+  nome: string;
+}[];
 
 }

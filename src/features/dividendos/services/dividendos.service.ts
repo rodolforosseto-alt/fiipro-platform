@@ -1,5 +1,46 @@
 import { supabase } from "@/lib/supabase";
 
+export async function getLatestDividendosByFundo(
+  fundoId: string
+) {
+
+  const { data, error } = await supabase
+
+    .from("dividendos")
+
+    .select("*")
+
+    .eq(
+      "fundo_id",
+      fundoId
+    )
+
+    .order(
+      "data_pagamento",
+      {
+        ascending:false
+      }
+    )
+
+    .limit(10);
+
+
+  if(error){
+
+    console.error(
+      "Erro buscando últimos dividendos:",
+      error
+    );
+
+    throw error;
+
+  }
+
+
+  return data;
+
+}
+
 export async function getDividendosByFundo(fundoId: string) {
   const { data, error } = await supabase
     .from("dividendos")

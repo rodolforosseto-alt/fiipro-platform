@@ -1,6 +1,10 @@
 import { getFundoByTicker } from "@/features/fundos/services/fundos.service";
 
-import { getDividendosByFundo } from "@/features/dividendos/services/dividendos.service";
+import {
+  getDividendosByFundo,
+  getLatestDividendosByFundo
+}
+from "@/features/dividendos/services/dividendos.service";
 
 import { FundHeader } from "@/features/fundos/components/FundHeader";
 
@@ -62,7 +66,8 @@ fundo.ticker
 );
 
 const dividendos =
-await getDividendosByFundo(fundo.id);
+await getLatestDividendosByFundo(
+fundo.id);
 
 const cotacoes =
 await getCotacoesByFundo(fundo.id);

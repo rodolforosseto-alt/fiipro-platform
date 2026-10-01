@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface Props {
 
 ticker:string;
@@ -32,6 +34,33 @@ return (
 <span className="text-blue-600">
 {segmento}
 </span>
+
+<div className="mt-6">
+
+<Link
+
+href={`/calculadora?fundo=${ticker}`}
+
+className="
+inline-flex
+items-center
+rounded-lg
+bg-green-600
+px-5
+py-3
+font-semibold
+text-white
+transition
+hover:bg-green-700
+"
+
+>
+
+🧮 Simular bola de neve
+
+</Link>
+
+</div>
 
 </div>
 
