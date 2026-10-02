@@ -66,14 +66,14 @@ dividendos.map((item)=>(
 
 <h3 className="text-xl font-bold">
 
-{item.fundos?.[0]?.ticker}
+{item.fundos?.ticker}
 
 </h3>
 
 
 <p className="text-gray-600">
 
-{item.fundos?.[0]?.nome}
+{item.fundos?.nome}
 
 </p>
 

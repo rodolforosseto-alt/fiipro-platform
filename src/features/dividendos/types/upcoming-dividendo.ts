@@ -7,8 +7,8 @@ data_pagamento: string;
 valor: number;
 
 fundos?: {
-  ticker: string;
-  nome: string;
-}[];
+  ticker:string;
+  nome:string;
+};
 
 }

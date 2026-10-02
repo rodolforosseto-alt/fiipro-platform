@@ -94,7 +94,14 @@ export async function getUpcomingDividendos(){
 
   }
 
+  return (data ?? []).map((item) => ({
 
-  return data;
+  ...item,
+
+  fundos: Array.isArray(item.fundos)
+    ? item.fundos[0]
+    : item.fundos
+
+}));
 
 }
