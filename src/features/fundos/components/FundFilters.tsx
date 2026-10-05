@@ -20,11 +20,17 @@ const filtros = [
 
 "Shopping",
 
-"Lajes",
+"Lajes Corporativas",
+
+"Fundos de Fundos",
 
 "Híbrido",
 
-"Agro"
+"Fiagro",
+
+"FI-Infra",
+
+"Desenvolvimento"
 
 ];
 
