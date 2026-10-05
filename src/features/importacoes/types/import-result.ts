@@ -8,6 +8,8 @@ duplicados?:number;
 
 atualizados?:number;
 
+semAlteracao?: number;
+
 erros:number;
 
 }

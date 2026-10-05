@@ -72,11 +72,6 @@ fundo.id);
 const cotacoes =
 await getCotacoesByFundo(fundo.id);
 
-console.log(
-"Cotações carregadas:",
-cotacoes
-);
-
 return (
 
 <main className="p-8">

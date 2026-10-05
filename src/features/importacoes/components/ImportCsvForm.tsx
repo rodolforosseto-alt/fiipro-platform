@@ -81,6 +81,8 @@ duplicados:0,
 
 atualizados:0,
 
+semAlteracao:0,
+
 erros:0
 
 };
@@ -118,6 +120,12 @@ resultado.duplicados,
 registros_atualizados:
 resultado.atualizados,
 
+registros_sem_alteracao:
+resultado.semAlteracao,
+
+detalhes_alteracao:
+resultado.detalhesAlteracao,
+
 registros_erro:
 resultado.erros
 },
@@ -148,6 +156,10 @@ resultado.atualizados,
 
 registros_duplicados:
 resultado.duplicados,
+
+registros_sem_alteracao:
+resultado.semAlteracao,
+
 
 registros_erro:
 resultado.erros

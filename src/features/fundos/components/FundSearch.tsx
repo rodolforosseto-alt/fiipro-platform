@@ -39,13 +39,9 @@ useRef<HTMLDivElement>(null);
 
 useEffect(()=>{
 
-console.log("FundSearch montou");
-
 function handleClickOutside(
 event:PointerEvent
 ){
-
-    console.log("clique detectado");
 
     if(
 containerRef.current &&

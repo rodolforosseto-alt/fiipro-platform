@@ -2,7 +2,7 @@ import { getFundos } from "@/features/fundos/services/fundos.service";
 
 import { FundosPageClient } from "@/features/fundos/components/FundosPageClient";
 
-
+export const dynamic = "force-dynamic";
 
 export default async function FundosPage(){
 

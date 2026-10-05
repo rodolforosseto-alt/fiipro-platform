@@ -53,6 +53,8 @@ registros_duplicados?:number;
 
 registros_atualizados?:number;
 
+registros_sem_alteracao?: number;
+
 registros_erro?:number;
 
 mensagem?:string;
