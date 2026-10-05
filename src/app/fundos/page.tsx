@@ -10,6 +10,11 @@ export default async function FundosPage(){
 const fundos = await getFundos();
 
 
+console.log(
+  "TOTAL NA PAGE FUNDOS:",
+  fundos.length
+);
+
 
 return (
 

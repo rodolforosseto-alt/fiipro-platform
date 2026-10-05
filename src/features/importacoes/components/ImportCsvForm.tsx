@@ -123,9 +123,6 @@ resultado.atualizados,
 registros_sem_alteracao:
 resultado.semAlteracao,
 
-detalhes_alteracao:
-resultado.detalhesAlteracao,
-
 registros_erro:
 resultado.erros
 },
