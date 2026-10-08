@@ -3,6 +3,93 @@ import { supabase } from "@/lib/supabase";
 import { ImportResult }
 from "../types/import-result";
 
+async function atualizarCotacaoAtual(){
+
+  const { data: fundos, error } =
+    await supabase
+      .from("fundos")
+      .select("id");
+
+
+  if(error){
+
+    throw error;
+
+  }
+
+
+  for(const fundo of fundos){
+
+
+    const { data: cotacao, error: cotacaoError } =
+
+      await supabase
+
+        .from("cotacoes_historico")
+
+        .select("valor,data")
+
+        .eq(
+          "fundo_id",
+          fundo.id
+        )
+
+        .order(
+          "data",
+          {
+            ascending:false
+          }
+        )
+
+        .limit(1)
+
+        .maybeSingle();
+
+
+
+    if(cotacaoError){
+
+      console.error(
+        "Erro buscando cotação:",
+        fundo.id
+      );
+
+      continue;
+
+    }
+
+
+
+    if(cotacao){
+
+
+      await supabase
+
+        .from("fundos")
+
+        .update({
+
+          cotacao:
+          cotacao.valor,
+
+          ultima_atualizacao:
+          new Date()
+
+        })
+
+        .eq(
+          "id",
+          fundo.id
+        );
+
+
+    }
+
+
+  }
+
+}
+
 export async function importCotacoes(
 dados:any[]
 ):Promise<ImportResult>
@@ -105,21 +192,23 @@ null,
 
 if(cotacoes.length === 0){
 
-return {
+  await atualizarCotacaoAtual();
 
-processados:
-dados.length,
 
-novos,
+  return {
 
-duplicados,
+    processados:
+    dados.length,
 
-erros
+    novos,
 
-};
+    duplicados,
+
+    erros
+
+  };
 
 }
-
 
 const {data,error}=
 
@@ -151,6 +240,9 @@ error
 throw error;
 
 }
+
+await atualizarCotacaoAtual();
+
 
 alert(
 "RETORNO COTAÇÕES:\n" +

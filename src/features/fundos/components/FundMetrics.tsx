@@ -27,7 +27,7 @@ return (
 
 title="Cotação"
 
-value={`R$ ${cotacao.toFixed(2)}`}
+value={`R$ ${(cotacao ?? 0).toFixed(2)}`}
 
 description="Preço atual da cota"
 
@@ -38,7 +38,7 @@ description="Preço atual da cota"
 
 title="Dividendo"
 
-value={`R$ ${dividendo.toFixed(2)}`}
+value={`R$ ${(dividendo ?? 0).toFixed(2)}`}
 
 description="Último rendimento"
 
@@ -49,7 +49,7 @@ description="Último rendimento"
 
 title="DY mensal"
 
-value={`${dy}%`}
+value={`${(dy ?? 0).toFixed(2)}%`}
 
 description="Dividend Yield"
 

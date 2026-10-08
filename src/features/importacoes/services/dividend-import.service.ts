@@ -3,6 +3,105 @@ import { supabase } from "@/lib/supabase";
 import { ImportResult }
 from "../types/import-result";
 
+async function atualizarResumoDividendos(){
+
+const { data: fundos, error } =
+
+await supabase
+.from("fundos")
+.select(
+"id,cotacao"
+);
+
+
+if(error){
+
+throw error;
+
+}
+
+
+
+for(const fundo of fundos){
+
+
+const { data: ultimo } =
+
+await supabase
+
+.from("dividendos")
+
+.select(
+"valor,data_pagamento"
+)
+
+.eq(
+"fundo_id",
+fundo.id
+)
+
+.order(
+"data_pagamento",
+{
+ascending:false
+}
+)
+
+.limit(1)
+
+.maybeSingle();
+
+
+
+if(ultimo){
+
+
+const dy =
+
+fundo.cotacao
+?
+
+(
+ultimo.valor /
+fundo.cotacao
+) * 100
+
+:
+
+null;
+
+
+
+await supabase
+
+.from("fundos")
+
+.update({
+
+ultimo_dividendo:
+ultimo.valor,
+
+dy_mensal:
+dy,
+
+ultima_atualizacao:
+new Date()
+
+})
+
+.eq(
+"id",
+fundo.id
+);
+
+
+}
+
+
+}
+
+}
+
 export async function importDividendos(
 dados:any[]
 ):Promise<ImportResult>
@@ -157,6 +256,8 @@ error
 throw error;
 
 }
+
+await atualizarResumoDividendos();
 
 return {
 
