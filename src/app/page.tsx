@@ -5,6 +5,9 @@ import { FeaturedFunds } from "@/features/home/components/FeaturedFunds";
 import { getUpcomingDividendos } from "@/features/dividendos/services/dividendos.service";
 import { UpcomingDividends } from "@/features/dividendos/components/UpcomingDividends";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function Home(){
 
 const dividendos =
