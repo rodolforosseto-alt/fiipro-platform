@@ -1,0 +1,36 @@
+name: Teste download diario B3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  testar-download:
+    name: Testar acesso ao arquivo diario da B3
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v6
+
+      - name: Configurar Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Instalar dependencia
+        run: python -m pip install requests
+
+      - name: Baixar e validar ultimo arquivo B3 disponivel
+        run: python cotacoes/b3_download.py
+
+      - name: Publicar arquivos de teste como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: cotahist-b3-download-teste
+          path: output/
+          if-no-files-found: error
+          retention-days: 3
