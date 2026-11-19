@@ -1,0 +1,19 @@
+
+name: Teste agendador GitHub
+
+on:
+  schedule:
+    - cron: "5,20,35,50 * * * *"
+      timezone: "America/Sao_Paulo"
+
+  workflow_dispatch:
+
+jobs:
+  teste:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Confirmar disparo automatico
+        run: |
+          echo "Agendador GitHub funcionando!"
+          date
