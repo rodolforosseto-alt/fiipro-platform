@@ -1,9 +1,12 @@
+
 name: Atualizacao de dividendos FIIPro
 
+"on":
+  workflow_dispatch:
+
   schedule:
-    - cron: '2,17,32,47 * * * *'
-      timezone: "America/Sao_Paulo"
-      
+    - cron: "30 11 * * *"
+
 permissions:
   contents: read
 
@@ -33,7 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Validar configuracao dos Secrets
+      - name: Validar Secrets
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
