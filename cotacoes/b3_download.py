@@ -22,8 +22,15 @@ def baixar_ultimo_pregao(data_inicial=None):
 
     session = requests.Session()
     session.headers.update({
-        "User-Agent": "Mozilla/5.0 (compatible; FIIPro/1.0)",
-        "Accept": "application/zip,application/octet-stream,*/*",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/130.0.0.0 Safari/537.36"
+    ),
+    "Accept": "*/*",
+    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8",
+    "X-Requested-With": "XMLHttpRequest",
+    "Referer": "https://www.b3.com.br/",
     })
 
     tentativas = []
@@ -38,6 +45,11 @@ def baixar_ultimo_pregao(data_inicial=None):
 
             try:
                 resposta = session.get(url, timeout=TIMEOUT)
+                print(f"HTTP: {resposta.status_code}")
+                print(f"URL final: {resposta.url}")
+                print(f"Content-Type: {resposta.headers.get('Content-Type')}")
+                print(f"Tamanho: {len(resposta.content)} bytes")
+                print(f"Resposta: {resposta.text[:200] if not resposta.content.startswith(b'PK') else 'ZIP'}")
             except requests.RequestException as erro:
                 tentativas.append(f"{data}: erro de conexão: {erro}")
                 print(f"  Falha de conexão: {erro}")
