@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/dividendos",
       "schedule": "30 11 * * *"
+    },
+    {
+      "path": "/api/cron/cotacoes",
+      "schedule": "0 23 * * *"
     }
   ]
 }
