@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 const API_BASE = "https://api.usebolsai.com/api/v1";
