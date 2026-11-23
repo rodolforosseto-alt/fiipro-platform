@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
     });
     const end = new Date().toISOString();
     const durationMs = Date.now() - startedAtMs;
-    const status = totals.errors > 0 ? "erro" : totals.review > 0 ? "parcial" : "concluido";
+    const status = totals.errors > 0 || totals.review > 0 ? "parcial" : "concluido";
     const message = JSON.stringify({ ...totals, failures: failures.slice(0, 30) });
     const { error } = await sb.from("importacoes").update({
       status, quantidade_registros: totals.funds, registros_processados: totals.success + totals.errors,
