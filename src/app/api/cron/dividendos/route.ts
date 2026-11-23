@@ -217,7 +217,7 @@ async function processFund(
     counts.inserted++;
   }
 
-  return { ticker: fund.ticker, status: "OK", ...counts, reviews };
+  return { ticker: fund.ticker, status: "OK" as const, ...counts, reviews };
 }
 
 export async function GET(request: Request) {
