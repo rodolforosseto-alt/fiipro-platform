@@ -295,7 +295,7 @@ export async function GET(request: Request) {
 
   const technicalErrors = failures.length;
   const hasReviewItems = totals.review > 0 || totals.undated > 0 || totals.invalid > 0;
-  const status = technicalErrors > 0 ? "erro" : hasReviewItems ? "parcial" : "concluido";
+  const status = technicalErrors > 0 || hasReviewItems ? "parcial" : "concluido";
   const finishedAt = new Date().toISOString();
   const durationMs = Date.now() - startedAtMs;
   const message = [
