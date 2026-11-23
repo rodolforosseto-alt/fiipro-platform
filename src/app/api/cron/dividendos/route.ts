@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -9,7 +9,10 @@ const SOURCE = "UseBolsaAI";
 const CONCURRENCY = 8;
 const PAGE_SIZE = 1000;
 
+type DbClient = SupabaseClient<any, "public", "public", any, any>;
 type Fund = { id: string; ticker: string };
+type FundCounts = { api: number; inserted: number; updated: number; unchanged: number; review: number; undated: number; invalid: number };
+type FundResult = { ticker: string; status: "OK" } & FundCounts & { reviews: Array<Record<string, unknown>> };
 type Payment = {
   payment_date?: string | null;
   record_date?: string | null;
@@ -87,7 +90,7 @@ async function getApiPayments(ticker: string, apiKey: string): Promise<Payment[]
 }
 
 async function getAllDividendRows(
-  supabase: ReturnType<typeof createClient>,
+  supabase: DbClient,
   fundId: string,
   startDate: string,
   endDate: string,
@@ -265,7 +268,7 @@ export async function GET(request: Request) {
     return json({ error: importError?.message ?? "Falha ao iniciar auditoria." }, 500);
   }
 
-  const results: Array<Record<string, unknown>> = [];
+  const results: FundResult[] = [];
   const failures: Array<{ ticker: string; error: string }> = [];
 
   await mapLimit(funds as Fund[], CONCURRENCY, async (fund) => {
