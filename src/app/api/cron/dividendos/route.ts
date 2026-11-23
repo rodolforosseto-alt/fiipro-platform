@@ -102,7 +102,6 @@ async function getAllDividendRows(
       .select("id,fundo_id,data_pagamento,data_corte,valor,fonte_dados")
       .eq("fundo_id", fundId)
       .gte("data_pagamento", startDate)
-      .lte("data_pagamento", endDate)
       .order("data_pagamento")
       .range(from, from + PAGE_SIZE - 1);
 
@@ -148,7 +147,10 @@ async function processFund(
       reviews.push({ ticker: fund.ticker, payment_date: rawPaymentDate ?? null, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason });
       continue;
     }
-    if (paymentDate < startDate || paymentDate > endDate) continue;
+    // Inclui pagamentos futuros já anunciados pela fonte.
+    // O limite inferior preserva a janela histórica de 12 meses;
+    // não há limite superior, pois a data de pagamento pode ser futura.
+    if (paymentDate < startDate) continue;
 
     const recordDate = normalizeDate(payment.record_date);
     const value = normalizeValue(payment.value_per_share);

@@ -22,7 +22,7 @@ O Hobby permite no máximo uma execução diária por Cron Job. A execução pod
 - `CRON_SECRET`
 
 ## Dividendos
-- Consulta fundos ativos e pagamentos com `payment_date` nos últimos 12 meses.
+- Consulta fundos ativos e pagamentos com `payment_date` a partir dos últimos 12 meses, incluindo pagamentos futuros já anunciados pela fonte.
 - Atualiza ou insere incrementalmente; nunca apaga histórico.
 - Compara evento por fundo, data de pagamento e data de corte.
 - Respeita o índice UNIQUE atual `(fundo_id, data_pagamento, valor)`; colisões são encaminhadas para revisão.
