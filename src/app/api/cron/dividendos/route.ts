@@ -236,6 +236,9 @@ export async function GET(request: Request) {
     return json({ error: "Missing server environment variables." }, 500);
   }
 
+  const startedAtMs = Date.now();
+  const startedAt = new Date().toISOString();
+
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -259,7 +262,7 @@ export async function GET(request: Request) {
       tipo: "dividendos",
       arquivo_nome: "vercel_cron_usebolsai",
       status: "processando",
-      created_at: new Date().toISOString(),
+      created_at: startedAt,
     })
     .select("id")
     .single();
@@ -291,7 +294,10 @@ export async function GET(request: Request) {
   }, { api: 0, inserted: 0, updated: 0, unchanged: 0, review: 0, undated: 0, invalid: 0 });
 
   const technicalErrors = failures.length;
-  const status = technicalErrors === 0 ? "concluido" : "erro";
+  const hasReviewItems = totals.review > 0 || totals.undated > 0 || totals.invalid > 0;
+  const status = technicalErrors > 0 ? "erro" : hasReviewItems ? "parcial" : "concluido";
+  const finishedAt = new Date().toISOString();
+  const durationMs = Date.now() - startedAtMs;
   const message = [
     `Fundos: ${funds.length}`,
     `Consultas OK: ${results.length}`,
@@ -312,12 +318,17 @@ export async function GET(request: Request) {
     registros_duplicados: totals.unchanged,
     registros_erro: technicalErrors + totals.invalid + totals.review,
     registros_atualizados: totals.updated,
+    registros_sem_alteracao: totals.unchanged,
+    duracao_ms: durationMs,
     mensagem: message,
-    finalizado_em: new Date().toISOString(),
+    finalizado_em: finishedAt,
   }).eq("id", importRow.id);
 
   return json({
-    status: technicalErrors === 0 && !finishError ? "success" : "partial",
+    status: status === "concluido" && !finishError ? "success" : "partial",
+    started_at: startedAt,
+    finished_at: finishedAt,
+    duration_ms: durationMs,
     importacao_id: importRow.id,
     window: { start: startDate, end: endDate },
     funds: { total: funds.length, ok: results.length, failed: failures.length },
@@ -325,5 +336,5 @@ export async function GET(request: Request) {
     failures,
     reviews: results.flatMap((row) => (row.reviews as Array<Record<string, unknown>>) ?? []),
     audit_error: finishError?.message ?? null,
-  }, technicalErrors === 0 && !finishError ? 200 : 207);
+  }, status === "concluido" && !finishError ? 200 : 207);
 }
