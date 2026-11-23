@@ -114,7 +114,7 @@ async function getAllDividendRows(
 }
 
 async function processFund(
-  supabase: ReturnType<typeof createClient>,
+  supabase: DbClient,
   fund: Fund,
   apiKey: string,
   startDate: string,
@@ -279,10 +279,14 @@ export async function GET(request: Request) {
     }
   });
 
-  const totals = results.reduce((acc, row) => {
-    for (const key of ["api", "inserted", "updated", "unchanged", "review", "undated", "invalid"] as const) {
-      acc[key] += Number(row[key] ?? 0);
-    }
+  const totals: FundCounts = results.reduce<FundCounts>((acc, row) => {
+    acc.api += row.api;
+    acc.inserted += row.inserted;
+    acc.updated += row.updated;
+    acc.unchanged += row.unchanged;
+    acc.review += row.review;
+    acc.undated += row.undated;
+    acc.invalid += row.invalid;
     return acc;
   }, { api: 0, inserted: 0, updated: 0, unchanged: 0, review: 0, undated: 0, invalid: 0 });
 
