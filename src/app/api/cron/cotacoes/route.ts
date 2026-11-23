@@ -35,7 +35,8 @@ export async function GET(request: NextRequest) {
   if (!apiKey || !url || !serviceKey) return NextResponse.json({ ok: false, error: "Variáveis de ambiente ausentes" }, { status: 500 });
 
   const sb = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
-  const start = new Date().toISOString();
+  const startedAtMs = Date.now();
+  const start = new Date(startedAtMs).toISOString();
   const totals = { funds: 0, success: 0, errors: 0, inserted: 0, updated: 0, unchanged: 0, review: 0 };
   const failures: Array<{ ticker: string; error: string }> = [];
   const { data: importRow, error: auditError } = await sb.from("importacoes")
@@ -94,16 +95,18 @@ export async function GET(request: NextRequest) {
       }
     });
     const end = new Date().toISOString();
-    const status = totals.errors === 0 && totals.review === 0 ? "concluido" : "erro";
+    const durationMs = Date.now() - startedAtMs;
+    const status = totals.errors > 0 ? "erro" : totals.review > 0 ? "parcial" : "concluido";
     const message = JSON.stringify({ ...totals, failures: failures.slice(0, 30) });
     const { error } = await sb.from("importacoes").update({
       status, quantidade_registros: totals.funds, registros_processados: totals.success + totals.errors,
       registros_novos: totals.inserted, registros_atualizados: totals.updated,
       registros_duplicados: totals.unchanged, registros_erro: totals.errors + totals.review,
+      registros_sem_alteracao: totals.unchanged, duracao_ms: durationMs,
       mensagem: message, finalizado_em: end,
     }).eq("id", importRow.id);
     if (error) throw new Error(`Falha ao finalizar auditoria: ${error.message}`);
-    return NextResponse.json({ ok: totals.errors === 0 && totals.review === 0, startedAt: start, finishedAt: end, ...totals, failures });
+    return NextResponse.json({ status: status === "concluido" ? "success" : "partial", startedAt: start, finishedAt: end, duration_ms: durationMs, ...totals, failures }, { status: status === "concluido" ? 200 : 207 });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await sb.from("importacoes").update({ status: "erro", mensagem: message, finalizado_em: new Date().toISOString() }).eq("id", importRow.id);
