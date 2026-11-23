@@ -1,10 +1,9 @@
-
 import os
 import time
 import requests
 import pandas as pd
 
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from io import StringIO
 from datetime import datetime, timedelta
@@ -28,10 +27,12 @@ SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 DIAS_HISTORICO = 90
-
 TIMEOUT = 30
-
 FONTE_DADOS = "Fundamentus"
+
+# As colunas de destino foram ampliadas para NUMERIC(14,8).
+# Mantemos os cálculos e os valores com oito casas decimais.
+PRECISAO_NUMERICA = Decimal("0.00000001")
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
@@ -41,7 +42,6 @@ HEADERS = {
 def conectar_supabase():
 
     if not SUPABASE_URL or not SUPABASE_KEY:
-
         raise RuntimeError(
             "Credenciais do Supabase não encontradas."
         )
@@ -57,27 +57,73 @@ def conectar_supabase():
 # ==========================================
 
 def data_atual():
-
     return datetime.now(TIMEZONE).date()
 
 
 def converter_valor(valor):
+    """
+    Converte valores numéricos ou strings brasileiras para Decimal,
+    preservando até oito casas decimais.
 
-    if pd.isna(valor):
+    Exemplos:
+      0.084       -> Decimal('0.08400000')
+      '0,0840'    -> Decimal('0.08400000')
+      '1.234,56'  -> Decimal('1234.56000000')
+      '0.0840'    -> Decimal('0.08400000')
+    """
+
+    if valor is None or pd.isna(valor):
         raise ValueError("Valor de dividendo vazio.")
 
     if isinstance(valor, str):
-
-        valor = (
-            valor
-            .replace(".", "")
-            .replace(",", ".")
-            .strip()
+        texto = (
+            valor.strip()
+            .replace("R$", "")
+            .replace("\u00a0", "")
+            .replace(" ", "")
         )
 
-    return Decimal(str(valor)).quantize(
-        Decimal("0.01")
+        if not texto:
+            raise ValueError("Valor de dividendo vazio.")
+
+        # Formato brasileiro: ponto de milhar e vírgula decimal.
+        if "," in texto:
+            texto = texto.replace(".", "").replace(",", ".")
+
+        valor_decimal = Decimal(texto)
+
+    else:
+        # Decimal(str(...)) evita introduzir novos erros binários
+        # a partir da representação textual do número recebido.
+        valor_decimal = Decimal(str(valor))
+
+    if not valor_decimal.is_finite():
+        raise ValueError(f"Valor de dividendo inválido: {valor!r}")
+
+    return valor_decimal.quantize(
+        PRECISAO_NUMERICA,
+        rounding=ROUND_HALF_UP
     )
+
+
+def decimal_para_banco(valor):
+    """
+    Envia Decimal como string decimal fixa.
+    O PostgreSQL converte a string para NUMERIC sem passar por float.
+    """
+    return format(converter_valor(valor), ".8f")
+
+
+def converter_cotacao(valor):
+    if valor is None or pd.isna(valor):
+        return None
+
+    cotacao = Decimal(str(valor))
+
+    if not cotacao.is_finite() or cotacao <= 0:
+        return None
+
+    return cotacao
 
 
 # ==========================================
@@ -119,24 +165,20 @@ def buscar_dividendos(
     )
 
     resposta.raise_for_status()
-
     resposta.encoding = "ISO-8859-1"
 
     try:
-
         tabelas = pd.read_html(
             StringIO(resposta.text),
             attrs={"id": "resultado"},
             decimal=",",
-            thousands="."
+            thousands=".",
+            converters={"Valor": str}
         )
-
     except ValueError:
-
         return None
 
     if not tabelas:
-
         return None
 
     tabela = tabelas[0]
@@ -178,32 +220,20 @@ def buscar_dividendos(
             errors="coerce"
         )
 
-        if (
-            pd.isna(data_corte)
-            or pd.isna(data_pagamento)
-        ):
+        if pd.isna(data_corte) or pd.isna(data_pagamento):
             continue
 
         if data_pagamento.date() < data_desde:
-
             continue
 
-        valor = converter_valor(
-            linha["Valor"]
-        )
+        valor = converter_valor(linha["Valor"])
 
         registros.append({
-
             "ticker": ticker,
-
-            "data_corte":
-                data_corte.strftime("%Y-%m-%d"),
-
-            "data_pagamento":
-                data_pagamento.strftime("%Y-%m-%d"),
-
-            "valor": float(valor)
-
+            "data_corte": data_corte.strftime("%Y-%m-%d"),
+            "data_pagamento": data_pagamento.strftime("%Y-%m-%d"),
+            # String decimal para não converter NUMERIC em float no JSON.
+            "valor": decimal_para_banco(valor)
         })
 
     return registros
@@ -234,12 +264,10 @@ def buscar_existentes(
     existentes = set()
 
     for item in resposta.data or []:
-
         chave = (
             item["data_pagamento"],
             converter_valor(item["valor"])
         )
-
         existentes.add(chave)
 
     return existentes
@@ -265,9 +293,7 @@ def inserir_dividendos(
             .table("dividendos")
             .upsert(
                 lote,
-                on_conflict=(
-                    "fundo_id,data_pagamento,valor"
-                ),
+                on_conflict="fundo_id,data_pagamento,valor",
                 ignore_duplicates=True
             )
             .execute()
@@ -288,62 +314,51 @@ def atualizar_resumos(
 ):
 
     atualizados = 0
-
     erros = 0
 
     for fundo in fundos:
 
         try:
-
             resposta = (
                 supabase
                 .table("dividendos")
-                .select(
-                    "valor,data_pagamento"
-                )
+                .select("valor,data_pagamento,created_at")
                 .eq("fundo_id", fundo["id"])
-                .order(
-                    "data_pagamento",
-                    desc=True
-                )
+                .order("data_pagamento", desc=True)
+                .order("created_at", desc=True)
                 .limit(1)
                 .execute()
             )
 
             if not resposta.data:
-
+                # Fundos sem histórico (ex.: CARE11) permanecem sem
+                # resumo de dividendos; não são tratados como erro.
                 continue
 
             ultimo = resposta.data[0]
+            valor = converter_valor(ultimo["valor"])
 
-            valor = float(
-                ultimo["valor"]
-            )
+            cotacao = converter_cotacao(fundo.get("cotacao"))
 
-            cotacao = fundo.get("cotacao")
-
-            if cotacao is not None and float(cotacao) > 0:
-
+            if cotacao is not None:
                 dy = (
-                    valor / float(cotacao)
-                ) * 100
-
+                    (valor / cotacao) * Decimal("100")
+                ).quantize(
+                    PRECISAO_NUMERICA,
+                    rounding=ROUND_HALF_UP
+                )
+                dy_banco = format(dy, ".8f")
             else:
-
-                dy = None
+                dy_banco = None
 
             (
                 supabase
                 .table("fundos")
                 .update({
-
-                    "ultimo_dividendo": valor,
-
-                    "dy_mensal": dy,
-
+                    "ultimo_dividendo": decimal_para_banco(valor),
+                    "dy_mensal": dy_banco,
                     "ultima_atualizacao":
                         datetime.now(TIMEZONE).isoformat()
-
                 })
                 .eq("id", fundo["id"])
                 .execute()
@@ -352,9 +367,7 @@ def atualizar_resumos(
             atualizados += 1
 
         except Exception as erro:
-
             erros += 1
-
             print(
                 f"Erro atualizando resumo "
                 f"{fundo['ticker']}: {erro}"
@@ -373,23 +386,15 @@ def iniciar_importacao(supabase):
         supabase
         .table("importacoes")
         .insert({
-
             "tipo": "dividendos",
-
-            "arquivo_nome":
-                "automacao_fundamentus",
-
+            "arquivo_nome": "automacao_fundamentus",
             "status": "processando",
-
-            "created_at":
-                datetime.now(TIMEZONE).isoformat()
-
+            "created_at": datetime.now(TIMEZONE).isoformat()
         })
         .execute()
     )
 
     if not resposta.data:
-
         raise RuntimeError(
             "Não foi possível registrar a importação."
         )
@@ -409,35 +414,75 @@ def finalizar_importacao(
     mensagem
 ):
 
-    supabase \
-        .table("importacoes") \
+    (
+        supabase
+        .table("importacoes")
         .update({
-
-            "status":
-                "concluido" if erros == 0 else "erro",
-
+            "status": "concluido" if erros == 0 else "erro",
             "quantidade_registros": quantidade,
-
             "registros_processados": processados,
-
             "registros_novos": novos,
-
             "registros_duplicados": duplicados,
-
             "registros_erro": erros,
-
             "registros_atualizados": atualizados,
-
             "registros_sem_alteracao": 0,
-
             "mensagem": mensagem,
-
-            "finalizado_em":
-                datetime.now(TIMEZONE).isoformat()
-
-        }) \
-        .eq("id", importacao_id) \
+            "finalizado_em": datetime.now(TIMEZONE).isoformat()
+        })
+        .eq("id", importacao_id)
         .execute()
+    )
+
+
+def registrar_falha_geral(
+    supabase,
+    importacao_id,
+    erro
+):
+    """
+    Registra falhas gerais sem mascarar a exceção original.
+    Se a importação já foi aberta, atualiza seu registro.
+    Caso contrário, cria um registro de falha.
+    """
+
+    mensagem = f"Falha geral na automação: {erro}"
+    agora = datetime.now(TIMEZONE).isoformat()
+
+    try:
+        if importacao_id:
+            (
+                supabase
+                .table("importacoes")
+                .update({
+                    "status": "erro",
+                    "registros_erro": 1,
+                    "mensagem": mensagem,
+                    "finalizado_em": agora
+                })
+                .eq("id", importacao_id)
+                .execute()
+            )
+        else:
+            (
+                supabase
+                .table("importacoes")
+                .insert({
+                    "tipo": "dividendos",
+                    "arquivo_nome": "automacao_fundamentus",
+                    "status": "erro",
+                    "registros_erro": 1,
+                    "mensagem": mensagem,
+                    "created_at": agora,
+                    "finalizado_em": agora
+                })
+                .execute()
+            )
+
+    except Exception as erro_registro:
+        print(
+            "Não foi possível registrar a falha no Supabase: "
+            f"{erro_registro}"
+        )
 
 
 # ==========================================
@@ -452,7 +497,6 @@ def main():
     importacao_id = None
     auditoria_finalizada = False
 
-    # Contadores e listas para auditoria
     fundos = []
     registros_novos = []
     fundos_sem_registros = []
@@ -467,9 +511,7 @@ def main():
     data_desde = data_atual() - timedelta(days=DIAS_HISTORICO)
 
     try:
-        # A auditoria é aberta antes das consultas principais.
         importacao_id = iniciar_importacao(supabase)
-
         fundos = buscar_fundos(supabase)
 
         print()
@@ -495,7 +537,6 @@ def main():
                 )
 
                 # None = não foi possível encontrar a tabela esperada.
-                # Não presumimos que o fundo não exista: fica para revisão.
                 if dados is None:
                     fundos_para_revisar.append({
                         "ticker": ticker,
@@ -508,7 +549,7 @@ def main():
                     time.sleep(0.4)
                     continue
 
-                # [] = a tabela existe, mas não há pagamentos no período.
+                # [] = tabela existe, mas sem pagamentos no período.
                 if len(dados) == 0:
                     fundos_sem_registros.append(ticker)
                     print(
@@ -540,7 +581,7 @@ def main():
                         duplicados += 1
                         continue
 
-                    # Evita duplicidade também dentro da própria execução.
+                    # Evita duplicidade dentro da própria execução.
                     existentes.add(chave)
 
                     registros_novos.append({
@@ -565,9 +606,9 @@ def main():
                     f"Erro técnico em {ticker}: {erro_fundo}"
                 )
 
-            time.sleep(0.4)            
+            time.sleep(0.4)
 
-        # A gravação é executada mesmo quando não há registros novos.
+        # Executa a gravação mesmo quando não há registros novos.
         novos = inserir_dividendos(
             supabase,
             registros_novos
@@ -673,5 +714,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
