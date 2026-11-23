@@ -10,10 +10,10 @@ UseBolsaAI é a fonte prioritária para dividendos, cotações e fundamentos. Cr
 Ambas exigem `Authorization: Bearer <CRON_SECRET>`.
 
 ## Agendamento Hobby
-- Dividendos: `30 11 * * *` UTC (08:30 em Brasília; execução pode ocorrer dentro da hora programada).
-- Cotações: `0 23 * * *` UTC (20:00 em Brasília; execução pode ocorrer dentro da hora programada).
+- Dividendos: domingo às 08:30 de Brasília (`30 11 * * 0` UTC).
+- Cotações: segunda a sexta às 20:30 de Brasília (`30 23 * * 1-5` UTC).
 
-O Hobby permite no máximo uma execução diária por Cron Job. Validar duração real das funções; ambas têm limite declarado de 60 segundos no código, sujeito aos limites efetivos do plano/projeto.
+O Hobby permite no máximo uma execução diária por Cron Job. A execução pode ocorrer dentro da janela de horário documentada pela Vercel. As rotas declaram `maxDuration = 60`; validar o limite efetivo do projeto e a duração real das funções antes de produção.
 
 ## Variáveis de ambiente da Vercel
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -27,9 +27,11 @@ O Hobby permite no máximo uma execução diária por Cron Job. Validar duraçã
 - Compara evento por fundo, data de pagamento e data de corte.
 - Respeita o índice UNIQUE atual `(fundo_id, data_pagamento, valor)`; colisões são encaminhadas para revisão.
 - Registra auditoria em `public.importacoes`.
+- Execução semanal aos domingos; a periodicidade poderá ser revista conforme o volume de divulgações e limites da API.
 
 ## Cotações
 - Consulta `/stocks/{ticker}/quote` e utiliza `trade_date` e `close`.
+- O agendamento ocorre de segunda a sexta após o fechamento; a API deve fornecer o último pregão disponível, inclusive após feriados.
 - Insere ou corrige o registro de `cotacoes_historico` para o fundo/data.
 - Atualiza a cotação corrente em `fundos.cotacao`.
 - Registra auditoria em `public.importacoes`.
@@ -42,7 +44,8 @@ O Hobby permite no máximo uma execução diária por Cron Job. Validar duraçã
 - Testar manualmente em Preview com variáveis de ambiente antes de ativar Cron em produção.
 
 ## Validações pendentes antes de produção
-- Validar no Vercel Hobby o tempo real das duas rotas; o processamento de 122 fundos usa concorrência limitada.
+- Validar no Vercel Hobby o tempo real das duas rotas; o processamento atual usa concorrência limitada a oito fundos.
+- Confirmar que o processamento dos fundos cabe no limite de duração efetivo; se não couber, implementar lotes persistentes com cursor e retomada antes de ativar em produção.
 - Confirmar no Supabase que `cotacoes_historico` possui UNIQUE `(fundo_id, data)` e que os campos `fundos.cotacao`, `ultima_atualizacao` e `fonte_dados` existem com os tipos esperados.
 - Confirmar que a tabela `importacoes` possui as colunas de métricas utilizadas pelas rotas.
 - Revisar os campos de resumo de dividendos usados pela interface antes de desativar o legado.
