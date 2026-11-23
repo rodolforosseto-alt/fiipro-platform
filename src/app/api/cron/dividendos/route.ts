@@ -141,6 +141,7 @@ async function processFund(
     const paymentDate = normalizeDate(payment.payment_date);
     if (!paymentDate) {
       counts.undated++;
+      reviews.push({ ticker: fund.ticker, payment_date: payment.payment_date ?? null, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason: "DATA_PAGAMENTO_AUSENTE" });
       continue;
     }
     if (paymentDate < startDate || paymentDate > endDate) continue;
@@ -273,12 +274,18 @@ export async function GET(request: Request) {
 
   const results: FundResult[] = [];
   const failures: Array<{ ticker: string; error: string }> = [];
+  const unavailable: Array<{ ticker: string; reason: string }> = [];
 
   await mapLimit(funds as Fund[], CONCURRENCY, async (fund) => {
     try {
       results.push(await processFund(supabase, fund, apiKey, startDate, endDate));
     } catch (error) {
-      failures.push({ ticker: fund.ticker, error: error instanceof Error ? error.message : String(error) });
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("UseBolsaAI HTTP 404")) {
+        unavailable.push({ ticker: fund.ticker, reason: "TICKER_NAO_COBERTO_PELA_USEBOLSAI" });
+      } else {
+        failures.push({ ticker: fund.ticker, error: message });
+      }
     }
   });
 
@@ -301,7 +308,8 @@ export async function GET(request: Request) {
   const message = [
     `Fundos: ${funds.length}`,
     `Consultas OK: ${results.length}`,
-    `Falhas: ${technicalErrors}`,
+    `Falhas técnicas: ${technicalErrors}`,
+    `Sem cobertura na UseBolsaAI: ${unavailable.length}`,
     `Novos: ${totals.inserted}`,
     `Atualizados: ${totals.updated}`,
     `Iguais: ${totals.unchanged}`,
@@ -331,8 +339,9 @@ export async function GET(request: Request) {
     duration_ms: durationMs,
     importacao_id: importRow.id,
     window: { start: startDate, end: endDate },
-    funds: { total: funds.length, ok: results.length, failed: failures.length },
+    funds: { total: funds.length, ok: results.length, failed: failures.length, unavailable: unavailable.length },
     totals,
+    unavailable,
     failures,
     reviews: results.flatMap((row) => (row.reviews as Array<Record<string, unknown>>) ?? []),
     audit_error: finishError?.message ?? null,
