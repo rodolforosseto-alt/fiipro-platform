@@ -141,7 +141,11 @@ async function processFund(
     const paymentDate = normalizeDate(payment.payment_date);
     if (!paymentDate) {
       counts.undated++;
-      reviews.push({ ticker: fund.ticker, payment_date: payment.payment_date ?? null, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason: "DATA_PAGAMENTO_AUSENTE" });
+      const rawPaymentDate = payment.payment_date;
+      const reason = typeof rawPaymentDate === "string" && /^(9999-|0000-)/.test(rawPaymentDate)
+        ? "DATA_PAGAMENTO_SENTINELA_INVALIDA"
+        : "DATA_PAGAMENTO_AUSENTE";
+      reviews.push({ ticker: fund.ticker, payment_date: rawPaymentDate ?? null, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason });
       continue;
     }
     if (paymentDate < startDate || paymentDate > endDate) continue;
