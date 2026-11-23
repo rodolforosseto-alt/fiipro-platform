@@ -13,7 +13,7 @@ Ambas exigem `Authorization: Bearer <CRON_SECRET>`.
 - Dividendos: domingo às 08:30 de Brasília (`30 11 * * 0` UTC).
 - Cotações: segunda a sexta às 20:30 de Brasília (`30 23 * * 1-5` UTC).
 
-O Hobby permite no máximo uma execução diária por Cron Job. A execução pode ocorrer dentro da janela de horário documentada pela Vercel. As rotas declaram `maxDuration = 60`; validar o limite efetivo do projeto e a duração real das funções antes de produção.
+O Hobby permite no máximo uma execução diária por Cron Job. A execução pode ocorrer dentro da janela de horário documentada pela Vercel. As rotas declaram `maxDuration = 60`. Nos testes manuais em Preview, dividendos executaram em aproximadamente 7,5–9 segundos e cotações em 12,6 segundos para 122 fundos.
 
 ## Variáveis de ambiente da Vercel
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -43,11 +43,15 @@ O Hobby permite no máximo uma execução diária por Cron Job. A execução pod
 - Nunca remover registros automaticamente.
 - Testar manualmente em Preview com variáveis de ambiente antes de ativar Cron em produção.
 
-## Validações pendentes antes de produção
-- Validar no Vercel Hobby o tempo real das duas rotas; o processamento atual usa concorrência limitada a oito fundos.
-- Confirmar que o processamento dos fundos cabe no limite de duração efetivo; se não couber, implementar lotes persistentes com cursor e retomada antes de ativar em produção.
+## Validações concluídas em Preview
+- Dividendos: 122 fundos consultados; 121 processados; CARE11 classificado como sem cobertura; zero falhas técnicas; duração observada entre 7,5 e 9 segundos.
+- Cotações: 122 fundos processados; zero falhas; duração observada de aproximadamente 12,6 segundos.
+- Auditoria: `duracao_ms` adicionada a `public.importacoes`; início, término, métricas e status parcial registrados.
+- Eventos com data sentinela `9999-12-31` são identificados para revisão, sem serem gravados como pagamentos válidos.
+
+## Pendências antes de ativar em produção
 - Confirmar no Supabase que `cotacoes_historico` possui UNIQUE `(fundo_id, data)` e que os campos `fundos.cotacao`, `ultima_atualizacao` e `fonte_dados` existem com os tipos esperados.
-- Confirmar que a tabela `importacoes` possui as colunas de métricas utilizadas pelas rotas.
-- Revisar os campos de resumo de dividendos usados pela interface antes de desativar o legado.
+- Confirmar a configuração das variáveis no ambiente Production da Vercel.
+- Confirmar os Cron Jobs no deployment de produção após o merge.
+- Manter os workflows antigos desativados até a nova rotina estar comprovadamente estável.
 - Vercel Hobby é destinado a uso pessoal/não comercial; avaliar upgrade antes de operação comercial.
-- Não desativar workflows antigos até a nova rotina estar comprovadamente estável.
