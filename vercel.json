@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/cotacoes",
-      "schedule": "30 23 * * 1-5"
+      "schedule": "30 9 * * 2-6"
     }
   ]
 }
