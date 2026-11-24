@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
   const start = new Date(startedAtMs).toISOString();
   const totals = { funds: 0, success: 0, errors: 0, inserted: 0, updated: 0, unchanged: 0, review: 0 };
   const failures: Array<{ ticker: string; error: string }> = [];
+  const tradeDates: Record<string, number> = {};
   const { data: importRow, error: auditError } = await sb.from("importacoes")
     .insert({ tipo: "cotacoes", arquivo_nome: "vercel_cron_usebolsai", status: "processando", mensagem: `Início ${start}` })
     .select("id").single();
@@ -65,6 +66,7 @@ export async function GET(request: NextRequest) {
         const tradeDate = dateOnly(q.trade_date);
         const close = price(q.close);
         if (!tradeDate || !close) throw new Error("Data do pregão ou fechamento inválido");
+        tradeDates[tradeDate] = (tradeDates[tradeDate] ?? 0) + 1;
 
         const { data: old, error: readError } = await sb.from("cotacoes_historico")
           .select("id,valor").eq("fundo_id", fund.id).eq("data", tradeDate).maybeSingle();
@@ -97,7 +99,7 @@ export async function GET(request: NextRequest) {
     const end = new Date().toISOString();
     const durationMs = Date.now() - startedAtMs;
     const status = totals.errors > 0 || totals.review > 0 ? "parcial" : "concluido";
-    const message = JSON.stringify({ ...totals, failures: failures.slice(0, 30) });
+    const message = JSON.stringify({ ...totals, tradeDates, failures: failures.slice(0, 30) });
     const { error } = await sb.from("importacoes").update({
       status, quantidade_registros: totals.funds, registros_processados: totals.success + totals.errors,
       registros_novos: totals.inserted, registros_atualizados: totals.updated,
@@ -106,7 +108,7 @@ export async function GET(request: NextRequest) {
       mensagem: message, finalizado_em: end,
     }).eq("id", importRow.id);
     if (error) throw new Error(`Falha ao finalizar auditoria: ${error.message}`);
-    return NextResponse.json({ status: status === "concluido" ? "success" : "partial", startedAt: start, finishedAt: end, duration_ms: durationMs, ...totals, failures }, { status: status === "concluido" ? 200 : 207 });
+    return NextResponse.json({ status: status === "concluido" ? "success" : "partial", startedAt: start, finishedAt: end, duration_ms: durationMs, ...totals, tradeDates, failures }, { status: status === "concluido" ? 200 : 207 });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await sb.from("importacoes").update({ status: "erro", mensagem: message, finalizado_em: new Date().toISOString() }).eq("id", importRow.id);
