@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/dividendos",
-      "schedule": "30 11 * * 0"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/cotacoes",
