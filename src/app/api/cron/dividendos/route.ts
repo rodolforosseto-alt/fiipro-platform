@@ -11,8 +11,12 @@ const PAGE_SIZE = 1000;
 
 type DbClient = SupabaseClient<any, "public", "public", any, any>;
 type Fund = { id: string; ticker: string };
-type FundCounts = { api: number; inserted: number; updated: number; unchanged: number; review: number; undated: number; invalid: number };
-type FundResult = { ticker: string; status: "OK" } & FundCounts & { reviews: Array<Record<string, unknown>> };
+type FundCounts = { api: number; inserted: number; updated: number; unchanged: number; review: number; undated: number; invalid: number; pending: number; orphans: number };
+type FundResult = { ticker: string; status: "OK" } & FundCounts & {
+  reviews: Array<Record<string, unknown>>;
+  pendingPayments: Array<Record<string, unknown>>;
+  orphanRows: Array<Record<string, unknown>>;
+};
 type Payment = {
   payment_date?: string | null;
   record_date?: string | null;
@@ -133,18 +137,28 @@ async function processFund(
   }
 
   const seenApi = new Set<string>();
-  const counts = { api: 0, inserted: 0, updated: 0, unchanged: 0, review: 0, undated: 0, invalid: 0 };
+  const counts = { api: 0, inserted: 0, updated: 0, unchanged: 0, review: 0, undated: 0, invalid: 0, pending: 0, orphans: 0 };
   const reviews: Array<Record<string, unknown>> = [];
+  const pendingPayments: Array<Record<string, unknown>> = [];
+  const orphanRows: Array<Record<string, unknown>> = [];
+  // IDs de linhas do banco que correspondem a algum pagamento da API (ou já estão sinalizadas para revisão).
+  const matchedIds = new Set<string>();
 
   for (const payment of payments) {
     const paymentDate = normalizeDate(payment.payment_date);
     if (!paymentDate) {
-      counts.undated++;
       const rawPaymentDate = payment.payment_date;
-      const reason = typeof rawPaymentDate === "string" && /^(9999-|0000-)/.test(rawPaymentDate)
-        ? "DATA_PAGAMENTO_SENTINELA_INVALIDA"
-        : "DATA_PAGAMENTO_AUSENTE";
-      reviews.push({ ticker: fund.ticker, payment_date: rawPaymentDate ?? null, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason });
+      const isPlaceholder = typeof rawPaymentDate === "string" && /^(9999-|0000-)/.test(rawPaymentDate);
+      if (isPlaceholder) {
+        // 9999-12-31 é o padrão da B3 para "data de pagamento a definir": o dividendo foi anunciado
+        // (ou está retido pelo fundo), mas ainda não tem data. Não é erro e não é gravado sem data;
+        // quando a B3 publicar a data, a próxima sincronização grava o evento normalmente.
+        counts.pending++;
+        pendingPayments.push({ ticker: fund.ticker, payment_date: rawPaymentDate, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason: "PAGAMENTO_A_DEFINIR" });
+        continue;
+      }
+      counts.undated++;
+      reviews.push({ ticker: fund.ticker, payment_date: rawPaymentDate ?? null, record_date: payment.record_date ?? null, value_per_share: payment.value_per_share ?? null, reason: "DATA_PAGAMENTO_AUSENTE" });
       continue;
     }
     // Inclui pagamentos futuros já anunciados pela fonte.
@@ -174,6 +188,7 @@ async function processFund(
     const uniqueRows = byUnique.get(uniqueKey) ?? [];
 
     if (eventRows.length > 1) {
+      for (const row of eventRows) matchedIds.add(row.id);
       counts.review++;
       reviews.push({ ticker: fund.ticker, payment_date: paymentDate, record_date: recordDate, value, reason: "EVENTO_DUPLICADO_NO_BANCO" });
       continue;
@@ -181,6 +196,7 @@ async function processFund(
 
     if (eventRows.length === 1) {
       const current = eventRows[0];
+      matchedIds.add(current.id);
       const currentValue = normalizeValue(current.valor);
       const sourceAlreadyOfficial = current.fonte_dados === SOURCE;
 
@@ -190,6 +206,7 @@ async function processFund(
       }
 
       if (uniqueRows.some((row) => row.id !== current.id)) {
+        for (const row of uniqueRows) matchedIds.add(row.id);
         counts.review++;
         reviews.push({ ticker: fund.ticker, payment_date: paymentDate, record_date: recordDate, value, reason: "COLISAO_UNIQUE_COM_OUTRO_EVENTO" });
         continue;
@@ -207,6 +224,7 @@ async function processFund(
     }
 
     if (uniqueRows.length > 0) {
+      for (const row of uniqueRows) matchedIds.add(row.id);
       counts.review++;
       reviews.push({ ticker: fund.ticker, payment_date: paymentDate, record_date: recordDate, value, reason: "CHAVE_UNIQUE_EXISTE_PARA_OUTRO_EVENTO" });
       continue;
@@ -224,7 +242,28 @@ async function processFund(
     counts.inserted++;
   }
 
-  return { ticker: fund.ticker, status: "OK" as const, ...counts, reviews };
+  // Registros ausentes na API: possíveis retificações (data/valor mudou) ou eventos removidos pela fonte.
+  // Apenas LISTA; nunca apaga. A decisão de remover é manual.
+  if (payments.length === 0 && dbRows.length > 0) {
+    counts.review++;
+    reviews.push({ ticker: fund.ticker, reason: "API_SEM_PAGAMENTOS_COM_REGISTROS_NA_BASE", registros_na_base: dbRows.length });
+  } else {
+    for (const row of dbRows) {
+      if (matchedIds.has(row.id)) continue;
+      counts.orphans++;
+      orphanRows.push({
+        ticker: fund.ticker,
+        id: row.id,
+        data_pagamento: row.data_pagamento,
+        data_corte: row.data_corte,
+        valor: row.valor,
+        fonte_dados: row.fonte_dados,
+        reason: "REGISTRO_AUSENTE_NA_API",
+      });
+    }
+  }
+
+  return { ticker: fund.ticker, status: "OK" as const, ...counts, reviews, pendingPayments, orphanRows };
 }
 
 export async function GET(request: Request) {
@@ -303,11 +342,18 @@ export async function GET(request: Request) {
     acc.review += row.review;
     acc.undated += row.undated;
     acc.invalid += row.invalid;
+    acc.pending += row.pending;
+    acc.orphans += row.orphans;
     return acc;
-  }, { api: 0, inserted: 0, updated: 0, unchanged: 0, review: 0, undated: 0, invalid: 0 });
+  }, { api: 0, inserted: 0, updated: 0, unchanged: 0, review: 0, undated: 0, invalid: 0, pending: 0, orphans: 0 });
 
   const technicalErrors = failures.length;
-  const hasReviewItems = totals.review > 0 || totals.undated > 0 || totals.invalid > 0;
+  // "A definir" (pending) é situação normal e não torna a execução parcial; órfãos sim, pois pedem decisão.
+  const hasReviewItems = totals.review > 0 || totals.undated > 0 || totals.invalid > 0 || totals.orphans > 0;
+  const orphanList = results.flatMap((row) => row.orphanRows);
+  const orphanSample = orphanList.slice(0, 10)
+    .map((o) => `${o.ticker} pgto ${o.data_pagamento} R$ ${o.valor} (${o.fonte_dados ?? "sem fonte"})`)
+    .join("; ");
   const status = technicalErrors > 0 || hasReviewItems ? "parcial" : "concluido";
   const finishedAt = new Date().toISOString();
   const durationMs = Date.now() - startedAtMs;
@@ -322,6 +368,9 @@ export async function GET(request: Request) {
     `Revisão: ${totals.review}`,
     `Sem data: ${totals.undated}`,
     `Inválidos: ${totals.invalid}`,
+    `A definir: ${totals.pending}`,
+    `Órfãos: ${totals.orphans}`,
+    ...(orphanSample ? [`Amostra de órfãos: ${orphanSample}`] : []),
   ].join(" | ");
 
   const { error: finishError } = await supabase.from("importacoes").update({
@@ -350,6 +399,8 @@ export async function GET(request: Request) {
     unavailable,
     failures,
     reviews: results.flatMap((row) => (row.reviews as Array<Record<string, unknown>>) ?? []),
+    pending_payments: results.flatMap((row) => row.pendingPayments),
+    orphans: orphanList.slice(0, 200),
     audit_error: finishError?.message ?? null,
   }, status === "concluido" && !finishError ? 200 : 207);
 }
