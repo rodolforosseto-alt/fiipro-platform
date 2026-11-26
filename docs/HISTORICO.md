@@ -39,6 +39,7 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 - **23/11**: merge do PR #2. Testes manuais em Preview: dividendos com 122 fundos (121 OK, CARE11 sem cobertura, dois eventos HAAA11 sem data) e cotações com 122 fundos e zero falhas. À noite, o cron das 20:30 rodou sem erros, mas a API ainda não entregava o fechamento do dia (122 fundos "sem alteração"). Fechamento de 23/11 importado manualmente depois.
 - **24/11**: diagnóstico confirmou que a API passa a entregar o fechamento só durante a noite/madrugada; cron movido para a manhã seguinte (PR #4).
 - **25/11**: execução das 06:30 confirmada (cotações do dia anterior gravadas). Cron de dividendos passou a diário. Respostas do suporte da UseBolsaAI esclareceram o ciclo de atualização, as retificações e o significado de `9999-12-31`. PR #5 tratou o "a definir" e adicionou o relatório de órfãos.
+- **26/11**: primeiras execuções automáticas em produção confirmadas (dividendos 06:06, cotações 06:36). Dividendos: `A definir: 2`, `Órfãos: 0`, mas `Revisão: 39` (eram 2 em 23/11). Causa provável: um workflow antigo do GitHub Actions (Fundamentus) ainda rodava todo dia e gravava valores arredondados (ex.: MXRF11 0,10 contra 0,095 da UseBolsaAI); como o valor faz parte da chave única, as duas linhas coexistiam. Os workflows foram desativados pelo usuário e removidos do repositório. Limpeza dos duplicados já gravados: pendente (somente com autorização).
 
 ## 5. Casos especiais
 
@@ -58,8 +59,8 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 
 ## 7. Próximos passos
 
-1. Conferir a primeira execução diária de dividendos (26/11, depois das 06:00): esperado `A definir: 2` (HAAA11) e a contagem de `Órfãos` com amostra no campo `mensagem` de `importacoes`.
-2. Decidir o que fazer com os órfãos listados (manter, corrigir ou apagar), com autorização do usuário.
+1. Limpar os dividendos duplicados Fundamentus x UseBolsaAI (linhas do Fundamentus que têm equivalente da UseBolsaAI para o mesmo fundo e data de pagamento), com autorização do usuário; depois confirmar que `Revisão` volta a ficar próximo de zero.
+2. Acompanhar `Órfãos` nas próximas execuções (26/11: 0). Se aparecerem, decidir manter, corrigir ou apagar, com autorização do usuário.
 3. Confirmar com o administrador do HAAA11 a situação do evento de R$ 1,39 (data-com 30/12/2025).
 4. Conferir se a execução de cotações continua pegando o dia anterior nos próximos dias; ajustar o horário se vier "sem alteração".
 5. (Opcional) Avaliar `years=1` nas consultas de dividendos, como sugere o provedor.
