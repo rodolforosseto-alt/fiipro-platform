@@ -1,7 +1,12 @@
-import { supabase } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { requireAdmin } from "@/lib/admin-session";
 
 
 export async function getRecentFeedbacks(){
+
+await requireAdmin();
+
+const supabase = getSupabaseAdmin();
 
 const { data,error } =
 
@@ -35,6 +40,10 @@ return data ?? [];
 }
 
 export async function getRecentImports(){
+
+await requireAdmin();
+
+const supabase = getSupabaseAdmin();
 
 const { data,error } =
 
@@ -80,6 +89,10 @@ return data ?? [];
 }
 
 export async function getMostAccessedFunds(){
+
+await requireAdmin();
+
+const supabase = getSupabaseAdmin();
 
 const { data,error } =
 
@@ -139,6 +152,10 @@ b.acessos - a.acessos
 }
 
 export async function getAdminMetrics(){
+
+await requireAdmin();
+
+const supabase = getSupabaseAdmin();
 
 const [
 
