@@ -1,6 +1,12 @@
 import { AdminGuard }
 from "../components/AdminGuard";
 
+import { AdminLogin }
+from "../components/AdminLogin";
+
+import { isAdminAuthenticated }
+from "@/lib/admin-session";
+
 import { AdminMetricCard }
 from "@/features/admin/components/AdminMetricCard";
 
@@ -25,6 +31,13 @@ import { AdminSectionTitle }
 from "@/features/admin/components/AdminSectionTitle";
 
 export default async function DashboardPage(){
+
+// Os dados só são consultados depois de validar a sessão do admin.
+if(!(await isAdminAuthenticated())){
+
+return <AdminLogin />;
+
+}
 
 
 const metrics =

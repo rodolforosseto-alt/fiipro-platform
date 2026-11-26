@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
+import { AdminLogin } from "./AdminLogin";
 
-import { AdminLogin }
-from "../importar/AdminLogin";
+import { isAdminAuthenticated } from "@/lib/admin-session";
 
 
 interface Props {
@@ -15,21 +14,11 @@ export async function AdminGuard({
 children
 }:Props){
 
-
-const cookieStore =
-await cookies();
-
-
-const autorizado =
-cookieStore.get("fiipro_admin")?.value === "true";
-
-
-if(!autorizado){
+if(!(await isAdminAuthenticated())){
 
 return <AdminLogin />;
 
 }
-
 
 return children;
 

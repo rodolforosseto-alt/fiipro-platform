@@ -40,6 +40,7 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 - **24/11**: diagnóstico confirmou que a API passa a entregar o fechamento só durante a noite/madrugada; cron movido para a manhã seguinte (PR #4).
 - **25/11**: execução das 06:30 confirmada (cotações do dia anterior gravadas). Cron de dividendos passou a diário. Respostas do suporte da UseBolsaAI esclareceram o ciclo de atualização, as retificações e o significado de `9999-12-31`. PR #5 tratou o "a definir" e adicionou o relatório de órfãos.
 - **26/11**: primeiras execuções automáticas em produção confirmadas (dividendos 06:06, cotações 06:36). Dividendos: `A definir: 2`, `Órfãos: 0`, mas `Revisão: 39` (eram 2 em 23/11). Causa provável: um workflow antigo do GitHub Actions (Fundamentus) ainda rodava todo dia e gravava valores arredondados (ex.: MXRF11 0,10 contra 0,095 da UseBolsaAI); como o valor faz parte da chave única, as duas linhas coexistiam. Os workflows foram desativados pelo usuário e removidos do repositório. Limpeza dos duplicados já gravados: pendente (somente com autorização).
+- **26/11 (segurança do admin)**: a tela de importação por CSV (`/admin/importar`) e os serviços dela foram removidos (a importação manual deixou de ser usada). O admin passou a ler os dados no servidor com a chave de serviço, depois de validar a sessão, e o cookie fixo `fiipro_admin=true` foi substituído por um token assinado com validade de 8 h. Ajuste das políticas de RLS (restringir a escrita pública) fica para depois da validação do deploy.
 
 ## 5. Casos especiais
 
@@ -61,6 +62,7 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 
 1. Limpar os dividendos duplicados Fundamentus x UseBolsaAI (linhas do Fundamentus que têm equivalente da UseBolsaAI para o mesmo fundo e data de pagamento), com autorização do usuário; depois confirmar que `Revisão` volta a ficar próximo de zero.
 2. Acompanhar `Órfãos` nas próximas execuções (26/11: 0). Se aparecerem, decidir manter, corrigir ou apagar, com autorização do usuário.
+2b. Restringir as políticas de RLS (item C do plano de segurança): remover INSERT/UPDATE públicos de `dividendos` e demais tabelas, deixando leitura pública só para `fundos`, `dividendos` e `cotacoes_historico` e apenas INSERT para `feedbacks`, `contacts` e `acessos_fundos`. Só depois de validar o deploy do admin no servidor.
 3. Confirmar com o administrador do HAAA11 a situação do evento de R$ 1,39 (data-com 30/12/2025).
 4. Conferir se a execução de cotações continua pegando o dia anterior nos próximos dias; ajustar o horário se vier "sem alteração".
 5. (Opcional) Avaliar `years=1` nas consultas de dividendos, como sugere o provedor.
