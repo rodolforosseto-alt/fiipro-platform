@@ -1,3 +1,4 @@
+import { formatDividend } from "@/lib/format";
 import { Dividendo } from "@/features/dividendos/types/dividendo";
 
 import { MetricCard }
@@ -80,7 +81,7 @@ return (
 title="Média mensal de dividendos"
 
 value={
-`R$ ${media.toFixed(2)}`
+`R$ ${formatDividend(media)}`
 }
 
 description="Média dos últimos 12 meses"

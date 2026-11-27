@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/Card";
 import Link from "next/link";
+import { formatDecimal, formatDividend, formatPercent } from "@/lib/format";
 
 interface FundCardProps {
   ticker: string;
@@ -8,6 +9,8 @@ interface FundCardProps {
   cotacao: number;
   ultimo_dividendo: number;
   dy_mensal: number;
+  dy_12m?: number | null;
+  pvp?: number | null;
 }
 
 
@@ -18,6 +21,8 @@ export function FundCard({
   cotacao,
   ultimo_dividendo,
   dy_mensal,
+  dy_12m,
+  pvp,
 }: FundCardProps) {
 
   return (
@@ -57,7 +62,7 @@ export function FundCard({
           </p>
 
           <p className="text-lg font-semibold text-green-600">
-            {ultimo_dividendo != null ? `R$ ${ultimo_dividendo.toFixed(2)}` : "--"}
+            {ultimo_dividendo != null ? `R$ ${formatDividend(ultimo_dividendo)}` : "--"}
           </p>
         </div>
 
@@ -68,9 +73,33 @@ export function FundCard({
           </p>
 
           <p className="text-lg font-semibold">
-            {dy_mensal != null ? `${dy_mensal.toFixed(2)}%` : "--"}
+            {formatPercent(dy_mensal)}
           </p>
         </div>
+
+        {dy_12m != null && (
+          <div>
+            <p className="text-sm text-gray-500">
+              DY 12 meses
+            </p>
+
+            <p className="text-lg font-semibold">
+              {formatPercent(dy_12m)}
+            </p>
+          </div>
+        )}
+
+        {pvp != null && (
+          <div>
+            <p className="text-sm text-gray-500">
+              P/VP
+            </p>
+
+            <p className="text-lg font-semibold">
+              {formatDecimal(pvp)}
+            </p>
+          </div>
+        )}
 
       </div>
 

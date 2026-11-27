@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/cotacoes",
       "schedule": "30 9 * * 2-6"
+    },
+    {
+      "path": "/api/cron/indicadores",
+      "schedule": "45 9 * * *"
     }
   ]
 }

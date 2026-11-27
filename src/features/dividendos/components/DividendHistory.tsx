@@ -1,3 +1,4 @@
+import { formatDividend } from "@/lib/format";
 import { Dividendo } from "../types/dividendo";
 
 
@@ -92,7 +93,7 @@ export function DividendHistory({ dividendos }: Props) {
 
 
                 <td className="p-4 font-semibold text-green-600">
-                  R$ {dividendo.valor.toFixed(2)}
+                  R$ {formatDividend(dividendo.valor)}
                 </td>
 
               </tr>

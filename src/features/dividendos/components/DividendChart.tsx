@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDividend } from "@/lib/format";
+
 import {
   LineChart,
   Line,
@@ -125,7 +127,7 @@ return (
 
 Dividendo:
 
-R$ {payload[0].value.toFixed(2)}
+R$ {formatDividend(payload[0].value)}
 
 </p>
 

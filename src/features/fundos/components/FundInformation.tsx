@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/Card";
 
+import { formatCompactMoney } from "@/lib/format";
+
 
 interface Props {
 
@@ -10,6 +12,12 @@ descricao: string | null;
 patrimonio: number | null;
 
 numero_cotistas: number | null;
+
+tipo_fundo?: string | null;
+
+tipo_gestao?: string | null;
+
+administrador?: string | null;
 
 }
 
@@ -35,7 +43,13 @@ descricao,
 
 patrimonio,
 
-numero_cotistas
+numero_cotistas,
+
+tipo_fundo,
+
+tipo_gestao,
+
+administrador
 
 }:Props){
 
@@ -90,15 +104,7 @@ Patrimônio
 
 {
 
-patrimonio
-
-?
-
-`R$ ${patrimonio.toLocaleString("pt-BR")}`
-
-:
-
-"Não informado"
+formatCompactMoney(patrimonio)
 
 }
 
@@ -124,6 +130,72 @@ Número de cotistas
 </strong>
 
 </div>
+
+
+
+{tipo_fundo && (
+
+<div>
+
+<p className="text-sm text-gray-500">
+
+Tipo de fundo
+
+</p>
+
+<strong>
+
+{tipo_fundo}
+
+</strong>
+
+</div>
+
+)}
+
+
+
+{tipo_gestao && (
+
+<div>
+
+<p className="text-sm text-gray-500">
+
+Tipo de gestão
+
+</p>
+
+<strong>
+
+{tipo_gestao}
+
+</strong>
+
+</div>
+
+)}
+
+
+
+{administrador && (
+
+<div>
+
+<p className="text-sm text-gray-500">
+
+Administrador
+
+</p>
+
+<strong>
+
+{administrador}
+
+</strong>
+
+</div>
+
+)}
 
 
 </div>
