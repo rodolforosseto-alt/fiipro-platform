@@ -12,7 +12,7 @@ Documento de continuidade do projeto. Atualizado em 27/11/2026. Regras estáveis
 | Base de dividendos | Limpa | 100% UseBolsaAI; 39 duplicados do Fundamentus removidos em 26/11. |
 | Admin (`/admin/dashboard`) | Protegido | Sessão assinada (8 h) e consultas no servidor com chave de serviço. |
 | RLS (Supabase) | Aplicado | Anon só lê `fundos`, `dividendos`, `cotacoes_historico` e só insere `feedbacks`, `contacts`, `acessos_fundos`; `importacoes` sem políticas. |
-| Domínio | Em produção | `fiipro.com.br` (Registro.br, DNS do Registro.br) apontando para a Vercel; ativo em 26/11. |
+| Domínio | Em produção | `fiipro.com.br` (Registro.br, DNS do Registro.br) apontando para a Vercel; ativo em 26/11. `www.fiipro.com.br` redireciona (308) para o domínio principal desde 27/11. |
 | Vercel Production | Ready | Último deploy: merge do PR #6. |
 | Vercel Schedules | Não migrado | Ainda em beta; ver decisões. |
 
@@ -48,7 +48,7 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 - **25/11**: execução das 06:30 confirmada (cotações do dia anterior gravadas). Cron de dividendos passou a diário. Respostas do suporte da UseBolsaAI esclareceram o ciclo de atualização, as retificações e o significado de `9999-12-31`. PR #5 tratou o "a definir" e adicionou o relatório de órfãos.
 - **26/11**: primeiras execuções automáticas em produção confirmadas (dividendos 06:06, cotações 06:36). Dividendos: `A definir: 2`, `Órfãos: 0`, mas `Revisão: 39` (eram 2 em 23/11). Causa provável: um workflow antigo do GitHub Actions (Fundamentus) ainda rodava todo dia e gravava valores arredondados (ex.: MXRF11 0,10 contra 0,095 da UseBolsaAI); como o valor faz parte da chave única, as duas linhas coexistiam. Os workflows foram desativados pelo usuário e removidos do repositório. Limpeza dos 39 duplicados feita ainda em 26/11, com autorização: removidas as linhas do Fundamentus que tinham equivalente da UseBolsaAI; MXRF11 ficou com uma linha e a base ficou 100% UseBolsaAI.
 - **26/11 (segurança do admin)**: a tela de importação por CSV (`/admin/importar`) e os serviços dela foram removidos (a importação manual deixou de ser usada). O admin passou a ler os dados no servidor com a chave de serviço, depois de validar a sessão, e o cookie fixo `fiipro_admin=true` foi substituído por um token assinado com validade de 8 h. Depois de validar o admin em produção, as políticas de RLS foram restringidas (removidas as escritas públicas em `fundos`, `dividendos`, `cotacoes_historico` e todas as políticas de `importacoes`, além da leitura pública de `feedbacks` e `acessos_fundos`). Estado conferido pela listagem de `pg_policies`.
-- **26/11 (domínio)**: `fiipro.com.br` registrado no Registro.br e adicionado na Vercel com um registro `A` na raiz (valor indicado pela própria Vercel). A zona demorou para ser publicada (servidores do domínio "em transição" no Registro.br); o site passou a abrir no mesmo dia. O `www` não foi configurado.
+- **26/11 (domínio)**: `fiipro.com.br` registrado no Registro.br e adicionado na Vercel com um registro `A` na raiz (valor indicado pela própria Vercel). A zona demorou para ser publicada (servidores do domínio "em transição" no Registro.br); o site passou a abrir no mesmo dia. O `www` foi configurado em 27/11: adicionado na Vercel com redirecionamento 308 para `fiipro.com.br` e `CNAME` `www` criado no Registro.br com o valor indicado pela Vercel.
 - **27/11**: execuções de produção confirmam o resultado da limpeza. Dividendos (06:06): 122 fundos, 121 consultas OK, 0 falhas técnicas, 1 sem cobertura (CARE11), 1434 iguais, `Revisão: 0`, `A definir: 2`, `Órfãos: 0`, `concluido`. Cotações (06:36): 122 fundos, 119 gravados com data de pregão 26/11, 1 com 25/11 e 3 sem alteração (2 com data de pregão 05/11, ou seja, sem negociação recente), `concluido`.
 
 ## 5. Casos especiais
@@ -71,9 +71,8 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 
 1. Acompanhar `Órfãos` nas próximas execuções (26/11 e 27/11: 0). Se aparecerem, decidir manter, corrigir ou apagar, com autorização do usuário.
 2. Quando o site for aberto ao público, avaliar limite de envios nos INSERTs públicos (`feedbacks`, `contacts`, `acessos_fundos`).
-3. Decidir se o `www.fiipro.com.br` será configurado (adicionar na Vercel com redirecionamento e criar o `CNAME` no Registro.br).
-3b. Acompanhar os fundos cuja data de pregão não avança (em 27/11, 2 fundos com 05/11).
-3c. Confirmar com o administrador do HAAA11 a situação do evento de R$ 1,39 (data-com 30/12/2025).
+3. Acompanhar os fundos cuja data de pregão não avança (em 27/11, 2 fundos com 05/11).
+3b. Confirmar com o administrador do HAAA11 a situação do evento de R$ 1,39 (data-com 30/12/2025).
 4. Conferir se a execução de cotações continua pegando o dia anterior nos próximos dias; ajustar o horário se vier "sem alteração".
 5. (Opcional) Avaliar `years=1` nas consultas de dividendos, como sugere o provedor.
 6. (Opcional) Definir o critério de DY a exibir: dividendos pagos ou declarados.
