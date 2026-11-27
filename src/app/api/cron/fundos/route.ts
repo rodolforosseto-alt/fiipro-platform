@@ -1,6 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
+import { cleanFundName } from "@/lib/fund-name";
+
 export const runtime = "nodejs";
 export const maxDuration = 300;
 
@@ -12,42 +14,6 @@ const TICKER = /^[A-Z]{4}\d{2}$/;
 
 type ApiListItem = { ticker?: unknown; name?: unknown; total_shareholders?: unknown };
 
-const SMALL_WORDS = new Set(["de", "da", "do", "das", "dos", "e", "em"]);
-const NOISE: RegExp[] = [
-  /\bDE RESPONSABILIDADE LIMITADA\b/gi,
-  /\bRESPONSABILIDADE LIMITADA\b/gi,
-  /\bRESP\.? LIMITADA\b/gi,
-  /\bFUNDO DE INVESTIMENTO IMOBILI[ÁA]RIO\b/gi,
-  /\s-\s*IMOBILI[ÁA]RIO\b/gi,
-  /\bFII\b/gi,
-  /\bRL\b/gi,
-];
-
-/**
- * Nome "bonito" a partir do nome registrado na CVM (em maiúsculas, com sufixos jurídicos).
- * Melhor esforço: a prévia da rota mostra o resultado antes de gravar qualquer coisa.
- */
-function cleanFundName(raw: string): string {
-  const original = raw.replace(/\s+/g, " ").trim();
-  let s = original;
-  for (const re of NOISE) s = s.replace(re, " ");
-  s = s.replace(/\s+/g, " ").replace(/[\s-]+$/, "").trim();
-  if (!s) s = original;
-
-  return s
-    .split(" ")
-    .map((word, index) => {
-      const lower = word.toLocaleLowerCase("pt-BR");
-      if (index > 0 && SMALL_WORDS.has(lower)) return lower;
-      if (word.length <= 3 && word === word.toLocaleUpperCase("pt-BR")) return word;
-      if (word === word.toLocaleUpperCase("pt-BR") || word === lower) {
-        return lower.charAt(0).toLocaleUpperCase("pt-BR") + lower.slice(1);
-      }
-      return word;
-    })
-    .join(" ");
-}
-
 function intOrNull(value: unknown): number | null {
   const n = Number(value);
   return value !== null && value !== undefined && value !== "" && Number.isFinite(n) ? Math.round(n) : null;
@@ -56,7 +22,8 @@ function intOrNull(value: unknown): number | null {
 /**
  * Cadastra na tabela `fundos` os FIIs que a UseBolsaAI lista e ainda não existem aqui.
  * - Sem parâmetros: só mostra a prévia (não grava nada).
- * - `?confirmar=1`: grava. Opcionais: `ativo=0` (entram desativados) e `limite=N` (só os N primeiros).
+ * - `?confirmar=1`: grava. Opcionais: `ativo=0` (entram desativados), `limite=N` (só os N primeiros) e
+ *   `minCotistas=N` (fundos com menos de N cotistas, ou sem informação, entram desativados).
  * Nunca altera nem apaga fundos existentes.
  */
 export async function GET(request: NextRequest) {
@@ -76,6 +43,10 @@ export async function GET(request: NextRequest) {
   const active = params.get("ativo") !== "0";
   const limitParam = Number(params.get("limite"));
   const limit = Number.isInteger(limitParam) && limitParam > 0 ? limitParam : null;
+  const minParam = Number(params.get("minCotistas"));
+  const minCotistas = Number.isInteger(minParam) && minParam > 0 ? minParam : null;
+  const isActive = (cotistas: number | null) =>
+    active && (minCotistas === null || (cotistas !== null && cotistas >= minCotistas));
 
   const sb = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const startedAtMs = Date.now();
@@ -119,16 +90,19 @@ export async function GET(request: NextRequest) {
     const notInApi = [...existing].filter((t) => !apiTickers.has(t)).sort();
     const toInsert = limit ? missing.slice(0, limit) : missing;
 
+    const entramAtivos = toInsert.filter((f) => isActive(f.numero_cotistas)).length;
     const summary = {
       api_total: list.length, ja_cadastrados: existing.size, novos: missing.length,
+      entrariam_ativos: entramAtivos, entrariam_desativados: toInsert.length - entramAtivos,
       invalidos: invalid.length, cadastrados_ausentes_na_api: notInApi,
     };
 
     if (!confirm) {
       return NextResponse.json({
         mode: "preview", ...summary,
-        aviso: "Nada foi gravado. Para cadastrar, chame de novo com ?confirmar=1 (opcionais: &ativo=0, &limite=N).",
-        novos_lista: missing, invalidos_lista: invalid.slice(0, 50),
+        aviso: "Nada foi gravado. Para cadastrar, chame de novo com ?confirmar=1 (opcionais: &ativo=0, &limite=N, &minCotistas=N).",
+        parametros: { ativo: active, limite: limit, minCotistas },
+        novos_lista: toInsert.map((f) => ({ ...f, entra_ativo: isActive(f.numero_cotistas) })), invalidos_lista: invalid.slice(0, 50),
       });
     }
 
@@ -142,7 +116,7 @@ export async function GET(request: NextRequest) {
     let inserted = 0;
     for (let i = 0; i < toInsert.length; i += INSERT_CHUNK) {
       const rows = toInsert.slice(i, i + INSERT_CHUNK).map((f) => ({
-        ticker: f.ticker, nome: f.nome, ativo: active, numero_cotistas: f.numero_cotistas, fonte_dados: "UseBolsaAI",
+        ticker: f.ticker, nome: f.nome, ativo: isActive(f.numero_cotistas), numero_cotistas: f.numero_cotistas, fonte_dados: "UseBolsaAI",
       }));
       const { data, error } = await sb.from("fundos").upsert(rows, { onConflict: "ticker", ignoreDuplicates: true }).select("ticker");
       if (error) throw new Error(`Cadastro de fundos: ${error.message}`);
@@ -150,7 +124,7 @@ export async function GET(request: NextRequest) {
     }
 
     const durationMs = Date.now() - startedAtMs;
-    const message = JSON.stringify({ ...summary, inseridos: inserted, ativo: active, limite: limit });
+    const message = JSON.stringify({ ...summary, inseridos: inserted, ativo: active, limite: limit, minCotistas });
     const { error } = await sb.from("importacoes").update({
       status: "concluido", quantidade_registros: list.length, registros_processados: toInsert.length,
       registros_novos: inserted, registros_duplicados: existing.size, duracao_ms: durationMs,
@@ -158,7 +132,7 @@ export async function GET(request: NextRequest) {
     }).eq("id", auditId);
     if (error) throw new Error(`Falha ao finalizar auditoria: ${error.message}`);
 
-    return NextResponse.json({ mode: "confirmed", status: "success", duration_ms: durationMs, ...summary, inseridos: inserted, ativo: active });
+    return NextResponse.json({ mode: "confirmed", status: "success", duration_ms: durationMs, ...summary, inseridos: inserted, ativo: active, minCotistas });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (auditId) {

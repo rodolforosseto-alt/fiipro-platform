@@ -56,6 +56,7 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 
 - **27/11 (indicadores em produção)**: PR #7 mergeado (`03bdc08`) após a migration. Primeira execução manual em produção: 122 fundos, 122 com indicadores, 0 erros, 13 s. Conferido no banco: MXRF11 com último dividendo 0,095, DY mensal 1,09% e DY 12m 13,69% (igual ao TTM da API); HAAA11 com DY 12m de 1,00% (só pagos). O CARE11 passou a receber indicadores (API respondeu no `/fiis/{ticker}`) mas segue sem dividendos no banco.
 - **27/11 (fundos novos, em PR)**: a lista `/fiis/` da API traz 401 FIIs (sem paginação) com nomes brutos da CVM e `segment` inconsistente. Nova rota `/api/cron/fundos` (prévia por padrão; grava só com `?confirmar=1`), `maxDuration` das rotas subiu para 300 s (limite do Hobby) e o `segmento` vazio passa a ser preenchido com o tipo do fundo. Passo a passo para trazer os fundos: rodar a prévia, conferir nomes, rodar com `?confirmar=1`, depois executar manualmente dividendos, cotações e indicadores.
+- **27/11 (prévia dos fundos novos)**: a prévia em produção deu 278 fundos novos, 1 ticker inválido (SPG211, fora do padrão de 4 letras + 2 números; não cadastrado) e nenhum cadastrado ausente da API. Muitos fundos têm poucos cotistas (29 com menos de 100, 102 com menos de 500, 135 com menos de 1.000). O limpador de nomes foi melhorado (sobras como "DE" no começo, "Resp Ltda", siglas) e a rota ganhou `minCotistas` para cadastrar os pequenos já desativados.
 
 ## 5. Casos especiais
 
