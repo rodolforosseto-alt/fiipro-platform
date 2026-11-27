@@ -237,3 +237,33 @@ feedbacks.count ?? 0
 };
 
 }
+
+
+export async function getAdminFundos(){
+
+await requireAdmin();
+
+const supabase = getSupabaseAdmin();
+
+const { data, error } = await supabase
+.from("fundos")
+.select("id,ticker,nome,segmento,ativo")
+.order("ticker");
+
+if(error){
+
+console.error("Erro buscando fundos para o admin:", error);
+
+throw error;
+
+}
+
+return (data ?? []) as Array<{
+id:string;
+ticker:string;
+nome:string;
+segmento:string | null;
+ativo:boolean | null;
+}>;
+
+}

@@ -1,3 +1,4 @@
+import { formatDividend } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
 import { UpcomingDividendo } from "../types/upcoming-dividendo";
 
@@ -116,7 +117,7 @@ Valor por cota
 
 <p className="font-bold text-green-600">
 
-R$ {item.valor.toFixed(2)}
+R$ {formatDividend(item.valor)}
 
 </p>
 

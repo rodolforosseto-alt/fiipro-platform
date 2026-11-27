@@ -22,12 +22,14 @@ Beta de uso próprio para visualizar dados de FIIs, com plano de evoluir. Respon
 
 ## Fontes de dados
 - Dividendos e cotações vêm **somente** da UseBolsaAI. A Fundamentus não deve voltar a alimentar esses dados.
-- Rotas: `GET /api/cron/dividendos` (`/fiis/{ticker}/distributions?years=2`) e `GET /api/cron/cotacoes` (`/stocks/{ticker}/quote`).
-- As duas exigem `Authorization: Bearer <CRON_SECRET>`. maxDuration 60 s, concorrência de 8 fundos.
+- Rotas: `GET /api/cron/dividendos` (`/fiis/{ticker}/distributions?years=2`), `GET /api/cron/cotacoes` (`/stocks/{ticker}/quote`) e `GET /api/cron/indicadores` (`/fiis/{ticker}`: P/VP, valor patrimonial por cota, patrimônio, cotistas, tipo e gestão, administrador, composição da carteira, vacância etc.).
+- As três exigem `Authorization: Bearer <CRON_SECRET>`. maxDuration 60 s, concorrência de 8 fundos.
 - HTTP 207 / status `partial` indica ocorrências de dados para revisar (ex.: órfãos, sem cobertura), **não** falha técnica.
 - A UseBolsaAI coleta os dados à noite, em dias úteis e aos sábados, e atualiza em ciclos diários (não em tempo real). Por isso a sincronização roda de manhã, e o dado de um dia só aparece na manhã seguinte.
 - Quando o administrador retifica valor ou datas de um dividendo, a API substitui o registro antigo. A data-com pode mudar, então não serve como chave fixa.
 - O campo `dividend_yield_ttm` da API inclui dividendos declarados e ainda não pagos. Não usar como DY real; calcular a partir do banco.
+- `fundos.ultimo_dividendo`, `dy_mensal` e `dy_12m` são calculados pela rota de indicadores a partir de `dividendos`, só com pagamentos já realizados (`data_pagamento <= hoje`), sem arredondar. O `/fiis/{ticker}` não traz último dividendo nem DY mensal. Dividendos aparecem no site sem arredondar para 2 casas (`formatDividend`, até 4 casas), porque o banco guarda o valor exato (ex.: 0,095).
+- O `segment` do `/fiis/{ticker}` não é confiável (MXRF11 vem como "Logística"). O `segmento` do cadastro é mantido por nós; o `fund_type` da API vai para `tipo_fundo`. Informes mensais têm defasagem: mostrar `indicadores_referencia`.
 
 ## Casos especiais já decididos
 - **CARE11**: continua no cadastro. A UseBolsaAI retorna 404; classificar como `unavailable` (motivo `TICKER_NAO_COBERTO_PELA_USEBOLSAI`), nunca como falha, e não remover o fundo.
@@ -39,11 +41,12 @@ Beta de uso próprio para visualizar dados de FIIs, com plano de evoluir. Respon
 - `public.importacoes`: auditoria de cada execução (início `created_at`, fim `finalizado_em`, `duracao_ms`, métricas, status `processando` / `concluido` / `parcial` / `erro`). Em cotações, o `mensagem` traz `tradeDates` (quantos fundos vieram por data de pregão).
 - `public.cotacoes_historico`: `fundo_id`, `data`, `valor`; único por (`fundo_id`, `data`).
 - `public.dividendos`: identificado por data de pagamento + data-com; único por (`fundo_id`, `data_pagamento`, `valor`).
-- `public.fundos`: `ticker` único; `cotacao`, `ultima_atualizacao`, `fonte_dados`.
+- `public.fundos`: `ticker` único; `ativo` (verdadeiro/falso; desativado some do site e das rotinas, alterado em `/admin/dashboard`); `cotacao`, `ultima_atualizacao`, `fonte_dados`; indicadores (`pvp`, `valor_patrimonial_cota`, `patrimonio`, `numero_cotistas`, `cotas_emitidas`, `tipo_fundo`, `tipo_gestao`, `administrador`, `mandato`, `data_inicio`, `composicao_ativos`, `vacancia_pct`, `inadimplencia_pct`, `percentual_locado`, `imoveis_qtd`, `area_total_m2`, `indicadores_referencia`, `indicadores_atualizados_em`) e dividendos derivados (`ultimo_dividendo`, `dy_mensal`, `dy_12m`).
 
 ## Cron Jobs (`vercel.json`)
 - Cotações: `30 9 * * 2-6` (terça a sábado, 09:30 UTC / 06:30 Brasília). Pega o fechamento do dia útil anterior.
 - Dividendos: `0 9 * * *` (todos os dias, 09:00 UTC / 06:00 Brasília).
+- Indicadores: `45 9 * * *` (todos os dias, 09:45 UTC / 06:45 Brasília). No plano Hobby a precisão é de ±59 min, então a ordem entre as rotas não é garantida; a rota de indicadores não depende da ordem (usa o fechamento devolvido pela própria API para o DY).
 - Decisão: não migrar para Vercel Schedules (ainda em beta) por enquanto; reavaliar quando sair do beta ou se houver necessidade real.
 
 ## Histórico e próximos passos

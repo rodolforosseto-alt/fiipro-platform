@@ -29,6 +29,10 @@ export function FundList({ fundos }: FundListProps) {
 
             dy_mensal={fundo.dy_mensal}
 
+            dy_12m={fundo.dy_12m}
+
+            pvp={fundo.pvp}
+
           />
 
         ))

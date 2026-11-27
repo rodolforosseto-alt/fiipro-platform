@@ -17,12 +17,16 @@ import {
   getAdminMetrics,
   getMostAccessedFunds,
   getRecentImports,
-  getRecentFeedbacks
+  getRecentFeedbacks,
+  getAdminFundos
 }
 from "@/features/admin/services/admin.service";
 
 import { ImportHistory }
 from "@/features/admin/components/ImportHistory";
+
+import { FundosAtivosPanel }
+from "@/features/admin/components/FundosAtivosPanel";
 
 import { FeedbackList }
 from "@/features/admin/components/FeedbackList";
@@ -51,6 +55,9 @@ await getRecentImports();
 
 const feedbacks =
 await getRecentFeedbacks();
+
+const fundosAdmin =
+await getAdminFundos();
 
 
 return (
@@ -154,6 +161,27 @@ description="Acompanhamento das cargas de dados"
 <ImportHistory
 
 importacoes={importacoes}
+
+/>
+
+</section>
+
+
+
+<section className="mt-10">
+
+<AdminSectionTitle
+
+title="🗂 Fundos"
+
+description="Ative ou desative fundos. Fundo desativado some do site e deixa de ser atualizado."
+
+/>
+
+
+<FundosAtivosPanel
+
+fundos={fundosAdmin}
 
 />
 

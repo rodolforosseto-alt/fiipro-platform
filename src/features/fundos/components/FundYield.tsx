@@ -3,18 +3,23 @@ import { Dividendo } from "@/features/dividendos/types/dividendo";
 import { MetricCard } 
 from "@/components/finance/MetricCard";
 
+import { formatPercent } from "@/lib/format";
+
 interface Props {
 
 cotacao:number;
 
 dividendos:Dividendo[];
 
+dy12m?:number | null;
+
 }
 
 
 export function FundYield({
 cotacao,
-dividendos
+dividendos,
+dy12m
 }:Props){
 
 
@@ -81,9 +86,13 @@ return (
 
 title="Dividend Yield últimos 12 meses"
 
-value={`${dy.toFixed(2)}%`}
+value={formatPercent(dy12m ?? dy)}
 
 description={
+dy12m != null
+?
+"Soma dos dividendos pagos nos últimos 12 meses dividida pela cotação."
+:
 `Baseado em ${dividendos12Meses.length} pagamentos nos últimos 12 meses.`
 }
 

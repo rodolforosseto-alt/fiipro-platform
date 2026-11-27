@@ -22,6 +22,8 @@ dividendo:number;
 
 dy:number;
 
+dy12m?:number | null;
+
 dividendos:Dividendo[];
 
 cotacoes:Cotacao[];
@@ -33,6 +35,7 @@ export function FundOverview({
 cotacao,
 dividendo,
 dy,
+dy12m,
 dividendos,
 cotacoes
 }:Props){
@@ -69,6 +72,8 @@ dy={dy}
 cotacao={cotacao}
 
 dividendos={dividendos}
+
+dy12m={dy12m}
 
 />
 

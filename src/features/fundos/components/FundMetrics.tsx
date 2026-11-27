@@ -1,3 +1,4 @@
+import { formatDividend } from "@/lib/format";
 import { MetricCard } from "@/components/finance/MetricCard";
 
 
@@ -38,7 +39,7 @@ description="Preço atual da cota"
 
 title="Dividendo"
 
-value={`R$ ${(dividendo ?? 0).toFixed(2)}`}
+value={`R$ ${formatDividend(dividendo ?? 0)}`}
 
 description="Último rendimento"
 

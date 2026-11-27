@@ -25,6 +25,9 @@ from "@/features/cotacoes/services/cotacoes.service";
 import { FundOverview }
 from "@/features/fundos/components/FundOverview";
 
+import { FundIndicators }
+from "@/features/fundos/components/FundIndicators";
+
 
 import { FundDividendSection }
 from "@/features/fundos/components/FundDividendSection";
@@ -97,9 +100,19 @@ dividendo={fundo.ultimo_dividendo}
 
 dy={fundo.dy_mensal}
 
+dy12m={fundo.dy_12m}
+
 dividendos={dividendos}
 
 cotacoes={cotacoes}
+
+/>
+
+
+
+<FundIndicators
+
+fundo={fundo}
 
 />
 
@@ -130,6 +143,12 @@ descricao={fundo.descricao}
 patrimonio={fundo.patrimonio}
 
 numero_cotistas={fundo.numero_cotistas}
+
+tipo_fundo={fundo.tipo_fundo}
+
+tipo_gestao={fundo.tipo_gestao}
+
+administrador={fundo.administrador}
 
 />
 

@@ -1,3 +1,4 @@
+import { formatDividend } from "@/lib/format";
 import { Dividendo } from "../types/dividendo";
 
 
@@ -98,7 +99,7 @@ Resumo de dividendos
 
 <p className="mt-2 text-2xl font-bold">
 
-R$ {ultimo?.valor.toFixed(2) ?? "0,00"}
+R$ {ultimo ? formatDividend(ultimo.valor) : "0,00"}
 
 </p>
 
@@ -116,7 +117,7 @@ Média últimos 12 meses
 
 <p className="mt-2 text-2xl font-bold">
 
-R$ {media.toFixed(2)}
+R$ {formatDividend(media)}
 
 </p>
 

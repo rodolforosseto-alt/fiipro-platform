@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDividend } from "@/lib/format";
+
 
 import { useState } from "react";
 
@@ -81,7 +83,7 @@ export function CalculatorForm({
             </p>
 
             <strong className="text-green-600">
-              R$ {dividendo.toFixed(2)}
+              R$ {formatDividend(dividendo)}
             </strong>
 
           </div>
