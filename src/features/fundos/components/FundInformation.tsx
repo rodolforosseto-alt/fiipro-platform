@@ -5,7 +5,7 @@ import { formatCompactMoney } from "@/lib/format";
 
 interface Props {
 
-gestor: string;
+gestor: string | null;
 
 descricao: string | null;
 
@@ -83,7 +83,7 @@ Gestor
 
 <strong>
 
-{gestor}
+{gestor || "Não informado"}
 
 </strong>
 

@@ -12,7 +12,7 @@ Documento de continuidade do projeto. Atualizado em 27/11/2026. Regras estáveis
 | Base de dividendos | Limpa | 100% UseBolsaAI; 39 duplicados do Fundamentus removidos em 26/11. |
 | Admin (`/admin/dashboard`) | Protegido | Sessão assinada (8 h) e consultas no servidor com chave de serviço. |
 | RLS (Supabase) | Aplicado | Anon só lê `fundos`, `dividendos`, `cotacoes_historico` e só insere `feedbacks`, `contacts`, `acessos_fundos`; `importacoes` sem políticas. |
-| Indicadores dos fundos | Em PR (feat/indicadores-fundos) | Migration `202611270001`, rota `/api/cron/indicadores` (diária 06:45), flag `ativo` no admin e dividendos sem arredondar. Só vale depois de aplicar a migration no Supabase e do merge. |
+| Indicadores dos fundos | Em produção | Migration `202611270001` aplicada, rota `/api/cron/indicadores` (diária 06:45), flag `ativo` no admin e dividendos sem arredondar (PR #7). |
 | Domínio | Em produção | `fiipro.com.br` (Registro.br, DNS do Registro.br) apontando para a Vercel; ativo em 26/11. `www.fiipro.com.br` redireciona (308) para o domínio principal desde 27/11. |
 | Vercel Production | Ready | Último deploy: merge do PR #6. |
 | Vercel Schedules | Não migrado | Ainda em beta; ver decisões. |
@@ -54,6 +54,9 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 
 - **27/11 (indicadores, em PR)**: análise da tabela `fundos` mostrou que `ultimo_dividendo` e `dy_mensal` vinham só da carga manual (nenhuma rota os atualizava; 107 de 121 fundos com `dy_mensal` inconsistente com cotação e dividendo), `patrimonio`/`numero_cotistas` preenchidos só no MXRF11 (valores manuais errados: API informa 1,6 mi de cotistas e R$ 5,2 bi) e `gestor`/`descricao` parciais. A resposta real do `/fiis/MXRF11` confirmou que a API não traz último dividendo nem DY mensal e que o `segment` dela é pouco confiável. Decisão do usuário: DY de 12 meses calculado pelo banco (só pagos); P/VP, patrimônio, cotistas e tipo vêm da API; dividendos exibidos sem arredondar; flag `ativo` com botão no admin.
 
+- **27/11 (indicadores em produção)**: PR #7 mergeado (`03bdc08`) após a migration. Primeira execução manual em produção: 122 fundos, 122 com indicadores, 0 erros, 13 s. Conferido no banco: MXRF11 com último dividendo 0,095, DY mensal 1,09% e DY 12m 13,69% (igual ao TTM da API); HAAA11 com DY 12m de 1,00% (só pagos). O CARE11 passou a receber indicadores (API respondeu no `/fiis/{ticker}`) mas segue sem dividendos no banco.
+- **27/11 (fundos novos, em PR)**: a lista `/fiis/` da API traz 401 FIIs (sem paginação) com nomes brutos da CVM e `segment` inconsistente. Nova rota `/api/cron/fundos` (prévia por padrão; grava só com `?confirmar=1`), `maxDuration` das rotas subiu para 300 s (limite do Hobby) e o `segmento` vazio passa a ser preenchido com o tipo do fundo. Passo a passo para trazer os fundos: rodar a prévia, conferir nomes, rodar com `?confirmar=1`, depois executar manualmente dividendos, cotações e indicadores.
+
 ## 5. Casos especiais
 
 - **CARE11**: mantido no cadastro por decisão do usuário. A UseBolsaAI retorna 404; classificado como `unavailable` (`TICKER_NAO_COBERTO_PELA_USEBOLSAI`), não como falha.
@@ -75,7 +78,8 @@ Repositório: https://github.com/rodolforosseto-alt/fiipro-platform
 0. Aplicar a migration `202611270001_add_fund_indicators.sql` no Supabase (SQL Editor) ANTES do merge do PR de indicadores; depois conferir a primeira execução de `/api/cron/indicadores` em `importacoes` e o MXRF11 no site (último dividendo 0,095).
 1. Acompanhar `Órfãos` nas próximas execuções (26/11 e 27/11: 0). Se aparecerem, decidir manter, corrigir ou apagar, com autorização do usuário.
 2. Quando o site for aberto ao público, avaliar limite de envios nos INSERTs públicos (`feedbacks`, `contacts`, `acessos_fundos`).
-2b. Trazer os ~300 fundos que faltam (a API cobre 400+ FIIs): processar em lotes (a rota atual faz 1 chamada por fundo com `maxDuration` 60 s e concorrência 8), carregar a lista via `/fiis/` e decidir o que fazer com fundos ilíquidos ou sem cobertura (`ativo = false`).
+2b. Trazer os ~280 fundos que faltam com a rota `/api/cron/fundos` (ver linha do tempo de 27/11) e desativar no admin os ilíquidos ou sem cobertura. Depois avaliar: rodar a rota de cadastro periodicamente para captar IPOs, e histórico de cotações dos fundos novos (começa no dia da entrada).
+2c. Revisar nomes do cadastro original: a API lista APTO11 como "Navi Residencial" e AIEC11 como "Arch Edifícios Corporativos", enquanto o cadastro tem "Autonomy Edifícios Corporativos" nos dois; revisar também `tipo_fundo` x `segmento` (ex.: CARE11).
 3. Acompanhar os fundos cuja data de pregão não avança (em 27/11, 2 fundos com 05/11).
 3b. Confirmar com o administrador do HAAA11 a situação do evento de R$ 1,39 (data-com 30/12/2025).
 4. Conferir se a execução de cotações continua pegando o dia anterior nos próximos dias; ajustar o horário se vier "sem alteração".
