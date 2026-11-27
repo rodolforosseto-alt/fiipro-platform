@@ -6,11 +6,11 @@ Beta de uso próprio para visualizar dados de FIIs, com plano de evoluir. Respon
 
 ## Stack
 - Next.js (rotas de API em Node.js), um pouco de Python
-- Hospedagem: Vercel (Cron Jobs definidos em `vercel.json`). Tudo que entra na `main` vai para produção.
+- Hospedagem: Vercel (Cron Jobs definidos em `vercel.json`). Tudo que entra na `main` vai para produção. Domínio: `fiipro.com.br` (registrado no Registro.br, DNS no próprio Registro.br).
 - Banco: Supabase (migrations em `supabase/migrations/`)
 - Fonte oficial de dados: UseBolsaAI (`https://api.usebolsai.com/api/v1`, cabeçalho `X-API-Key`)
 - Admin (`/admin/dashboard`): sessão por cookie assinado (`src/lib/admin-session.ts`). As consultas do admin rodam no servidor com a chave de serviço (`src/lib/supabase-admin.ts`) e só depois de validar a sessão. Nunca usar a chave de serviço em componentes `use client`.
-- A chave pública (anon) serve apenas para leitura pública e para inserir feedbacks, contatos e acessos. Não deve gravar nas demais tabelas (as políticas de RLS do banco devem refletir isso).
+- A chave pública (anon) serve apenas para leitura pública e para inserir feedbacks, contatos e acessos. Não deve gravar nas demais tabelas (as políticas de RLS do banco refletem isso desde 26/11; `importacoes` não tem políticas, só a chave de serviço acessa).
 
 ## Regras de trabalho (obrigatórias)
 - Nunca alterar a `main` sem minha autorização explícita. Com autorização, pode commitar direto na `main` em mudanças pequenas (ex.: horário de cron). Em mudanças de comportamento, é melhor usar branch + PR para ter o preview da Vercel, mas não é obrigatório criar branch sempre.
