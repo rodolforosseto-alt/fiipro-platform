@@ -23,7 +23,8 @@ Beta de uso próprio para visualizar dados de FIIs, com plano de evoluir. Respon
 ## Fontes de dados
 - Dividendos e cotações vêm **somente** da UseBolsaAI. A Fundamentus não deve voltar a alimentar esses dados.
 - Rotas: `GET /api/cron/dividendos` (`/fiis/{ticker}/distributions?years=2`), `GET /api/cron/cotacoes` (`/stocks/{ticker}/quote`) e `GET /api/cron/indicadores` (`/fiis/{ticker}`: P/VP, valor patrimonial por cota, patrimônio, cotistas, tipo e gestão, administrador, composição da carteira, vacância etc.).
-- As três exigem `Authorization: Bearer <CRON_SECRET>`. maxDuration 60 s, concorrência de 8 fundos.
+- `GET /api/cron/fundos` (`/fiis/`, lista com ~400 FIIs): cadastra em `fundos` os tickers que faltam. Não tem cron e nunca altera nem apaga fundos existentes. Sem parâmetros só mostra a prévia; grava com `?confirmar=1` (opcionais: `&ativo=0` entra desativado, `&limite=N`). Os nomes da CVM vêm em maiúsculas e são limpos (melhor esforço); `segmento` do fundo novo é preenchido pela rota de indicadores com o `fund_type` da API.
+- Todas exigem `Authorization: Bearer <CRON_SECRET>`. maxDuration 300 s (limite do plano Hobby), concorrência de 8 fundos.
 - HTTP 207 / status `partial` indica ocorrências de dados para revisar (ex.: órfãos, sem cobertura), **não** falha técnica.
 - A UseBolsaAI coleta os dados à noite, em dias úteis e aos sábados, e atualiza em ciclos diários (não em tempo real). Por isso a sincronização roda de manhã, e o dado de um dia só aparece na manhã seguinte.
 - Quando o administrador retifica valor ou datas de um dividendo, a API substitui o registro antigo. A data-com pode mudar, então não serve como chave fixa.

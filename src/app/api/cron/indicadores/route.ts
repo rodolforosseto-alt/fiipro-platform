@@ -2,14 +2,14 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const API_BASE = "https://api.usebolsai.com/api/v1";
 const PAGE_SIZE = 500;
 const CONCURRENCY = 8;
 const MAX_PAID_ROWS = 60;
 
-type Fund = { id: string; ticker: string; cotacao: number | string | null };
+type Fund = { id: string; ticker: string; cotacao: number | string | null; segmento: string | null };
 type ApiFii = Record<string, unknown>;
 
 function numOrNull(value: unknown): number | null {
@@ -81,6 +81,12 @@ async function dividendMetrics(sb: SupabaseClient, fundId: string, today: string
   };
 }
 
+/** Rótulos do filtro do site: o tipo do fundo da API vira o segmento quando o cadastro ainda não tem um. */
+function segmentFromType(type: string | null): string | null {
+  if (!type) return null;
+  return type === "Fundo de Fundos" ? "Fundos de Fundos" : type;
+}
+
 function indicatorFields(api: ApiFii) {
   const composition = api.asset_composition && typeof api.asset_composition === "object" ? api.asset_composition : null;
   return {
@@ -135,7 +141,7 @@ export async function GET(request: NextRequest) {
   try {
     const funds: Fund[] = [];
     for (let offset = 0; ; offset += PAGE_SIZE) {
-      const { data, error } = await sb.from("fundos").select("id,ticker,cotacao").eq("ativo", true).order("ticker").range(offset, offset + PAGE_SIZE - 1);
+      const { data, error } = await sb.from("fundos").select("id,ticker,cotacao,segmento").eq("ativo", true).order("ticker").range(offset, offset + PAGE_SIZE - 1);
       if (error) throw new Error(error.message);
       funds.push(...((data ?? []) as Fund[]));
       if (!data || data.length < PAGE_SIZE) break;
@@ -169,7 +175,13 @@ export async function GET(request: NextRequest) {
         // `ultima_atualizacao` continua sendo da cotação (rota de cotações); aqui só indicadores_atualizados_em.
         const payload: Record<string, unknown> = { ...dividends };
         if (api) {
-          Object.assign(payload, indicatorFields(api), { indicadores_atualizados_em: new Date().toISOString() });
+          const fields = indicatorFields(api);
+          Object.assign(payload, fields, { indicadores_atualizados_em: new Date().toISOString() });
+          // Só preenche o segmento quando está vazio: o cadastro manual dos 122 fundos originais não é alterado.
+          if (!fund.segmento?.trim()) {
+            const segment = segmentFromType(fields.tipo_fundo);
+            if (segment) payload.segmento = segment;
+          }
         }
         const { error } = await sb.from("fundos").update(payload).eq("id", fund.id);
         if (error) throw new Error(`Atualização do fundo: ${error.message}`);

@@ -16,6 +16,8 @@ const filtros = [
 
 "Papel",
 
+"Tijolo",
+
 "Logística",
 
 "Shopping",
