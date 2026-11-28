@@ -135,7 +135,7 @@ className="h-32 w-full rounded-lg border p-3"
 
 <button
 
-className="rounded-lg bg-green-600 px-6 py-3 text-white"
+className="rounded-lg bg-brand px-6 py-3 text-white"
 
 >
 

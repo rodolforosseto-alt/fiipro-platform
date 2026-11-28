@@ -92,7 +92,7 @@ export function DividendHistory({ dividendos }: Props) {
                 </td>
 
 
-                <td className="p-4 font-semibold text-green-600">
+                <td className="p-4 font-semibold text-brand">
                   R$ {formatDividend(dividendo.valor)}
                 </td>
 

@@ -1,5 +1,6 @@
 import { formatDividend } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
+import { Container } from "@/components/ui/Container";
 import { UpcomingDividendo } from "../types/upcoming-dividendo";
 
 
@@ -19,24 +20,24 @@ if(dividendos.length === 0){
 
 return (
 
-<section className="py-16">
+<section className="pt-16"><Container>
 
 
-<h2 className="text-center text-3xl font-bold">
+<h2 className="font-display text-5xl uppercase leading-none tracking-wide text-ink">
 
 Próximos dividendos
 
 </h2>
 
 
-<p className="mt-5 text-center text-gray-500">
+<p className="mt-5 text-muted">
 
 Nenhum dividendo próximo cadastrado.
 
 </p>
 
 
-</section>
+</Container></section>
 
 )
 
@@ -45,17 +46,17 @@ Nenhum dividendo próximo cadastrado.
 
 return (
 
-<section className="py-16">
+<section className="pt-16"><Container>
 
 
-<h2 className="text-center text-3xl font-bold">
+<h2 className="font-display text-5xl uppercase leading-none tracking-wide text-ink">
 
 Próximos dividendos
 
 </h2>
 
 
-<div className="mt-10 grid gap-5 md:grid-cols-3">
+<div className="mt-8 grid gap-5 md:grid-cols-3">
 
 
 {
@@ -115,7 +116,7 @@ Valor por cota
 </p>
 
 
-<p className="font-bold text-green-600">
+<p className="font-bold text-brand">
 
 R$ {formatDividend(item.valor)}
 
@@ -136,7 +137,7 @@ R$ {formatDividend(item.valor)}
 </div>
 
 
-</section>
+</Container></section>
 
 )
 

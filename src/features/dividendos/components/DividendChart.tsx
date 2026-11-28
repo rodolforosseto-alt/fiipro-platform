@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDividend } from "@/lib/format";
+import { formatDecimal, formatDividend } from "@/lib/format";
 
 import {
   LineChart,
@@ -123,7 +123,7 @@ return (
 </p>
 
 
-<p className="mt-1 text-green-600">
+<p className="mt-1 text-brand">
 
 Dividendo:
 
@@ -180,7 +180,7 @@ interval="preserveStartEnd"
 
 tickFormatter={(valor)=>
 
-`R$ ${valor.toFixed(2)}`
+`R$ ${formatDecimal(valor)}`
 
 }
 

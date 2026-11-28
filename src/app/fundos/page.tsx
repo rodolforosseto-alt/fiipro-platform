@@ -18,17 +18,17 @@ console.log(
 
 return (
 
-<main className="p-8">
+<main className="mx-auto w-full max-w-6xl px-6 py-10">
 
 
-<h1 className="text-4xl font-bold">
+<h1 className="font-display text-6xl uppercase leading-none tracking-wide text-ink">
 
 Fundos Imobiliários
 
 </h1>
 
 
-<p className="mt-3 text-gray-600">
+<p className="mt-3 text-muted">
 
 Encontre informações dos principais FIIs.
 

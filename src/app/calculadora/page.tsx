@@ -64,7 +64,7 @@ export default async function CalculadoraPage({
 
         <Link
           href="/fundos"
-          className="mt-6 inline-block text-blue-600"
+          className="mt-6 inline-block text-brand"
         >
           Voltar para fundos
         </Link>

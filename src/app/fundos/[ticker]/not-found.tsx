@@ -17,7 +17,7 @@ export default function NotFound() {
 
         <Link
           href="/fundos"
-          className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-3 text-white"
+          className="mt-6 inline-block rounded-lg bg-brand px-5 py-3 text-white"
         >
           Voltar para fundos
         </Link>

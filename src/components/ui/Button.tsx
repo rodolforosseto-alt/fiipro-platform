@@ -19,10 +19,10 @@ variant = "primary"
 const styles = {
 
 primary:
-"bg-green-600 text-white hover:bg-green-700",
+"bg-brand text-white hover:bg-brand-dark",
 
 secondary:
-"border border-blue-600 text-blue-600 hover:bg-blue-50"
+"border border-brand text-brand hover:bg-surface"
 
 };
 

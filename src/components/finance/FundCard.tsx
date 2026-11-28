@@ -14,6 +14,31 @@ interface FundCardProps {
 }
 
 
+function Metric({
+  label,
+  value,
+  highlight = false,
+}: {
+  label: string;
+  value: string;
+  highlight?: boolean;
+}) {
+
+  return (
+    <div>
+      <p className="text-sm text-muted">
+        {label}
+      </p>
+
+      <p className={`text-lg font-bold ${highlight ? "text-brand" : "text-ink"}`}>
+        {value}
+      </p>
+    </div>
+  );
+
+}
+
+
 export function FundCard({
   ticker,
   nome,
@@ -26,94 +51,70 @@ export function FundCard({
 }: FundCardProps) {
 
   return (
-    <Card>
+    <Card className="flex flex-col transition hover:border-brand">
 
-      <div className="mb-4">
-        <h2 className="text-xl font-bold">
+      <div className="mb-5">
+        <h2 className="font-display text-4xl leading-none tracking-wide text-ink">
           {ticker}
         </h2>
 
-        <p className="text-gray-500">
+        <p className="mt-1 text-muted">
           {nome}
         </p>
 
-        <span className="text-sm text-blue-600">
-          {segmento}
-        </span>
+        {segmento && (
+          <span className="mt-2 inline-block rounded-full bg-surface px-3 py-1 text-xs font-medium text-ink">
+            {segmento}
+          </span>
+        )}
       </div>
 
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-4">
 
-        <div>
-          <p className="text-sm text-gray-500">
-            Cotação
-          </p>
+        <Metric
+          label="Cotação"
+          value={cotacao != null ? `R$ ${formatDecimal(cotacao)}` : "--"}
+        />
 
-          <p className="text-lg font-semibold">
-            {cotacao != null ? `R$ ${cotacao.toFixed(2)}` : "--"}
-          </p>
-        </div>
+        <Metric
+          label="Último dividendo"
+          value={ultimo_dividendo != null ? `R$ ${formatDividend(ultimo_dividendo)}` : "--"}
+          highlight
+        />
 
-
-        <div>
-          <p className="text-sm text-gray-500">
-            Último dividendo
-          </p>
-
-          <p className="text-lg font-semibold text-green-600">
-            {ultimo_dividendo != null ? `R$ ${formatDividend(ultimo_dividendo)}` : "--"}
-          </p>
-        </div>
-
-
-        <div>
-          <p className="text-sm text-gray-500">
-            DY mensal
-          </p>
-
-          <p className="text-lg font-semibold">
-            {formatPercent(dy_mensal)}
-          </p>
-        </div>
+        <Metric
+          label="DY mensal"
+          value={formatPercent(dy_mensal)}
+        />
 
         {dy_12m != null && (
-          <div>
-            <p className="text-sm text-gray-500">
-              DY 12 meses
-            </p>
-
-            <p className="text-lg font-semibold">
-              {formatPercent(dy_12m)}
-            </p>
-          </div>
+          <Metric
+            label="DY 12 meses"
+            value={formatPercent(dy_12m)}
+          />
         )}
 
         {pvp != null && (
-          <div>
-            <p className="text-sm text-gray-500">
-              P/VP
-            </p>
-
-            <p className="text-lg font-semibold">
-              {formatDecimal(pvp)}
-            </p>
-          </div>
+          <Metric
+            label="P/VP"
+            value={formatDecimal(pvp)}
+          />
         )}
 
       </div>
 
-<Link
+      <Link
 
-href={`/fundos/${ticker}`}
+        href={`/fundos/${ticker}`}
 
-className="mt-5 inline-block text-blue-600 font-semibold"
+        className="mt-6 inline-block font-bold text-brand hover:text-brand-dark"
 
->
+      >
 
-Ver detalhes →
+        Ver detalhes →
 
-</Link>
+      </Link>
 
     </Card>
   );

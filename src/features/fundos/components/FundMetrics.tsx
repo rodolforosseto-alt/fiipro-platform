@@ -1,4 +1,4 @@
-import { formatDividend } from "@/lib/format";
+import { formatDecimal, formatDividend, formatPercent } from "@/lib/format";
 import { MetricCard } from "@/components/finance/MetricCard";
 
 
@@ -28,7 +28,7 @@ return (
 
 title="Cotação"
 
-value={`R$ ${(cotacao ?? 0).toFixed(2)}`}
+value={`R$ ${formatDecimal(cotacao ?? 0)}`}
 
 description="Preço atual da cota"
 
@@ -50,7 +50,7 @@ description="Último rendimento"
 
 title="DY mensal"
 
-value={`${(dy ?? 0).toFixed(2)}%`}
+value={formatPercent(dy ?? 0)}
 
 description="Dividend Yield"
 

@@ -77,7 +77,7 @@ await getCotacoesByFundo(fundo.id);
 
 return (
 
-<main className="p-8">
+<main className="mx-auto w-full max-w-6xl px-6 py-10">
 
 
 <FundHeader

@@ -61,7 +61,7 @@ className={`rounded-lg px-4 py-2 border
 
 ${segmento === filtro
 
-? "bg-blue-600 text-white"
+? "bg-brand text-white"
 
 : "bg-white"
 

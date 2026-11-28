@@ -21,19 +21,23 @@ return (
 
 <div>
 
-<h1 className="text-5xl font-black text-black">
+<h1 className="font-display text-7xl leading-none tracking-wide text-ink">
 {ticker}
 </h1>
 
 
-<h2 className="mt-2 text-xl font-semibold text-gray-700">
+<h2 className="mt-2 text-xl font-medium text-muted">
 {nome}
 </h2>
 
 
-<span className="text-blue-600">
+{segmento && (
+
+<span className="mt-3 inline-block rounded-full bg-surface px-3 py-1 text-sm font-medium text-ink">
 {segmento}
 </span>
+
+)}
 
 <div className="mt-6">
 
@@ -45,18 +49,18 @@ className="
 inline-flex
 items-center
 rounded-lg
-bg-green-600
+bg-brand
 px-5
 py-3
-font-semibold
+font-bold
 text-white
 transition
-hover:bg-green-700
+hover:bg-brand-dark
 "
 
 >
 
-🧮 Simular bola de neve
+Simular bola de neve
 
 </Link>
 
