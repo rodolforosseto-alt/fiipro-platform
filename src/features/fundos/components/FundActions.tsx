@@ -19,7 +19,7 @@ export function FundActions({
         href={`/calculadora?fundo=${encodeURIComponent(
           ticker
         )}`}
-        className="rounded-lg bg-green-600 px-5 py-3 text-white"
+        className="rounded-lg bg-brand px-5 py-3 text-white"
       >
         Calcular bola de neve
       </Link>

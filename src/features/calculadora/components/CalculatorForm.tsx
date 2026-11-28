@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDividend } from "@/lib/format";
+import { formatDecimal, formatDividend } from "@/lib/format";
 
 
 import { useState } from "react";
@@ -70,7 +70,7 @@ export function CalculatorForm({
             </p>
 
             <strong>
-              R$ {cotacao.toFixed(2)}
+              R$ {formatDecimal(cotacao)}
             </strong>
 
           </div>
@@ -82,7 +82,7 @@ export function CalculatorForm({
               Último dividendo
             </p>
 
-            <strong className="text-green-600">
+            <strong className="text-brand">
               R$ {formatDividend(dividendo)}
             </strong>
 
@@ -120,7 +120,7 @@ export function CalculatorForm({
 
         <button
           onClick={handleCalculate}
-          className="mt-6 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white"
+          className="mt-6 rounded-lg bg-brand px-6 py-3 font-semibold text-white"
         >
           Calcular minha bola de neve
         </button>

@@ -213,7 +213,7 @@ onKeyDown={handleKeyDown}
 
 <button
 
-className="rounded-lg bg-blue-600 px-5 text-white"
+className="rounded-lg bg-brand px-5 text-white"
 
 onClick={handleSearch}
 
@@ -262,7 +262,7 @@ border-b
 p-4
 ${
 selecionado === index
-? "bg-blue-50 border-l-4 border-blue-600"
+? "bg-surface border-l-4 border-brand"
 : "hover:bg-gray-50"
 }
 `}
@@ -292,7 +292,7 @@ setTerm("");
 </div>
 
 
-<div className="text-sm text-blue-600">
+<div className="text-sm text-brand">
 
 {fundo.segmento}
 

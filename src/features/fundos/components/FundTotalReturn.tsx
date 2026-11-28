@@ -1,3 +1,4 @@
+import { formatPercent } from "@/lib/format";
 import { Dividendo } from "@/features/dividendos/types/dividendo";
 
 import { Cotacao } from "@/features/cotacoes/types/cotacao";
@@ -150,7 +151,7 @@ return (
 title="Retorno total últimos 12 meses"
 
 value={
-`${retornoTotal.toFixed(2)}%`
+formatPercent(retornoTotal)
 }
 
 description="Dividendos recebidos + variação da cotação"

@@ -5,6 +5,14 @@ import { useState } from "react";
 import Link from "next/link";
 
 
+const links = [
+  { href: "/", label: "Início" },
+  { href: "/fundos", label: "Fundos" },
+  { href: "/calculadora", label: "Calculadora" },
+  { href: "/contato", label: "Contato" },
+];
+
+
 export function Header(){
 
   const [open,setOpen] = useState(false);
@@ -12,43 +20,45 @@ export function Header(){
 
   return (
 
-    <header className="relative border-b bg-white">
+    <header className="relative border-b border-line bg-white">
 
 
-      <div className="mx-auto flex max-w-6xl items-center justify-between p-5">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 
 
         <Link
           href="/"
-          className="text-2xl font-bold text-blue-900"
+          className="font-display text-4xl leading-none tracking-wide text-ink"
         >
-          FIIPro
+          FII<span className="text-brand">PRO</span>
         </Link>
 
 
 
         {/* Desktop */}
 
-        <nav className="hidden gap-6 md:flex">
+        <nav className="hidden items-center gap-7 md:flex">
 
-          <Link href="/">
-            Início
+          {
+            links.map((item) => (
+
+              <Link
+                key={item.href}
+                href={item.href}
+                className="font-medium text-ink hover:text-brand"
+              >
+                {item.label}
+              </Link>
+
+            ))
+          }
+
+          <Link
+            href="/fundos"
+            className="rounded-lg bg-brand px-5 py-2.5 font-bold text-white hover:bg-brand-dark"
+          >
+            Explorar FIIs
           </Link>
-
-
-          <Link href="/fundos">
-            Fundos
-          </Link>
-
-
-          <Link href="/calculadora">
-            Calculadora
-          </Link>
-
-
-          <button className="rounded-lg bg-green-600 px-4 py-2 text-white">
-            Entrar
-          </button>
 
         </nav>
 
@@ -60,13 +70,17 @@ export function Header(){
 
           type="button"
 
-          className="relative z-[9999] text-3xl md:hidden"
+          aria-label="Abrir menu"
+
+          aria-expanded={open}
+
+          className="relative z-[9999] rounded-lg border border-line px-3 py-2 text-ink md:hidden"
 
           onClick={() => setOpen(!open)}
 
         >
 
-          ☰
+          {open ? "Fechar" : "Menu"}
 
         </button>
 
@@ -90,41 +104,36 @@ export function Header(){
             flex-col
             gap-4
             border-b
+            border-line
             bg-white
-            p-5
+            p-6
             md:hidden
             "
 
           >
 
-            <Link
-              href="/"
-              onClick={()=>setOpen(false)}
-            >
-              Início
-            </Link>
+            {
+              links.map((item) => (
 
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={()=>setOpen(false)}
+                  className="font-medium text-ink"
+                >
+                  {item.label}
+                </Link>
+
+              ))
+            }
 
             <Link
               href="/fundos"
               onClick={()=>setOpen(false)}
+              className="rounded-lg bg-brand px-5 py-3 text-center font-bold text-white"
             >
-              Fundos
+              Explorar FIIs
             </Link>
-
-
-            <Link
-              href="/calculadora"
-              onClick={()=>setOpen(false)}
-            >
-              Calculadora
-            </Link>
-
-
-            <button className="rounded-lg bg-green-600 px-4 py-2 text-white">
-              Entrar
-            </button>
-
 
           </nav>
 

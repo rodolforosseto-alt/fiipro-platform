@@ -1,3 +1,4 @@
+import { formatDecimal, formatPercent } from "@/lib/format";
 import { Cotacao } from "../types/cotacao";
 
 import { MetricCard } from "@/components/finance/MetricCard";
@@ -98,7 +99,7 @@ Resumo de cotação
 title="Cotação atual"
 
 value={
-`R$ ${ultima.valor.toFixed(2)}`
+`R$ ${formatDecimal(ultima.valor)}`
 }
 
 />
@@ -109,7 +110,7 @@ value={
 title="Maior 12 meses"
 
 value={
-`R$ ${maior.toFixed(2)}`
+`R$ ${formatDecimal(maior)}`
 }
 
 />
@@ -120,7 +121,7 @@ value={
 title="Menor 12 meses"
 
 value={
-`R$ ${menor.toFixed(2)}`
+`R$ ${formatDecimal(menor)}`
 }
 
 />
@@ -131,7 +132,7 @@ value={
 title="Variação no período"
 
 value={
-`${variacao.toFixed(2)}%`
+formatPercent(variacao)
 }
 
 />

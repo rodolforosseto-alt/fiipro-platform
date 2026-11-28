@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDecimal } from "@/lib/format";
+
 import {
   LineChart,
   Line,
@@ -47,11 +49,11 @@ return (
 </p>
 
 
-<p className="mt-1 text-blue-600">
+<p className="mt-1 text-brand">
 
 Cotação:
 
-R$ {payload[0].value.toFixed(2)}
+R$ {formatDecimal(payload[0].value)}
 
 </p>
 
@@ -193,7 +195,7 @@ domain={[
 
 tickFormatter={(valor)=>
 
-`R$ ${valor.toFixed(2)}`
+`R$ ${formatDecimal(valor)}`
 
 }
 

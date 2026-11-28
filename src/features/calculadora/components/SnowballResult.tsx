@@ -49,7 +49,7 @@ export function SnowballResult({
             Dividendos mensais
           </p>
 
-          <strong className="text-xl text-green-600">
+          <strong className="text-xl text-brand">
             {currency(result.rendaMensal)}
           </strong>
 
@@ -79,7 +79,7 @@ export function SnowballResult({
           de uma nova cota, você precisa de aproximadamente:
         </p>
 
-        <p className="mt-2 text-3xl font-bold text-green-600">
+        <p className="mt-2 text-3xl font-bold text-brand">
           {result.cotasParaUmaNovaCota} cotas
         </p>
 

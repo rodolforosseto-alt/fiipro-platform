@@ -61,11 +61,18 @@ handleChange(e.target.value)
 
 placeholder="Digite o ticker ou nome do fundo"
 
+aria-label="Buscar fundo por ticker ou nome"
+
 className="
 w-full
 rounded-lg
 border
-p-3
+border-line
+bg-white
+px-4
+py-3.5
+text-base
+text-ink
 "
 
 
@@ -109,8 +116,9 @@ setTerm("");
 className="
 block
 border-b
+border-line
 p-4
-hover:bg-gray-50
+hover:bg-surface
 "
 
 >
@@ -130,7 +138,7 @@ hover:bg-gray-50
 </p>
 
 
-<p className="text-sm text-blue-600">
+<p className="text-sm text-brand">
 
 {fundo.segmento}
 

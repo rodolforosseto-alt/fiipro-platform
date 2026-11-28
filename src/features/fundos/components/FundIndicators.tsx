@@ -95,7 +95,7 @@ export function FundIndicators({ fundo }: Props) {
 
                   <div className="mt-1 h-2 w-full rounded bg-gray-100">
                     <div
-                      className="h-2 rounded bg-blue-600"
+                      className="h-2 rounded bg-brand"
                       style={{ width: `${Math.min(100, item.value)}%` }}
                     />
                   </div>

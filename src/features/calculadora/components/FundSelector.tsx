@@ -50,7 +50,7 @@ rounded-xl
 border
 p-5
 transition
-hover:border-green-500
+hover:border-brand
 hover:shadow-md
 "
 
@@ -67,7 +67,7 @@ hover:shadow-md
 </p>
 
 
-<span className="mt-3 inline-block text-sm text-green-600">
+<span className="mt-3 inline-block text-sm text-brand">
 Simular →
 </span>
 

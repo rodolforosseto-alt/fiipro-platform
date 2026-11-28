@@ -23,9 +23,9 @@ return (
 className={`
 rounded-xl
 border
+border-line
 bg-white
 p-6
-shadow-sm
 ${className}
 `}
 
